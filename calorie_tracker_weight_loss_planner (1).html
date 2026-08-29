@@ -55,26 +55,6 @@
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
             background-color: #f9f8f5;
-            font-size: 16px;
-        }
-                    },
-                    boxShadow: {
-                        'soothe': '0 8px 24px -4px rgba(82, 121, 111, 0.12), 0 4px 12px -2px rgba(212, 163, 115, 0.08)',
-                        'soothe-card': '0 4px 18px -2px rgba(107, 144, 128, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03)',
-                        'soothe-btn': '0 4px 14px rgba(82, 121, 111, 0.25)',
-                        'bottom-bar': '0 -4px 20px rgba(82, 121, 111, 0.08)',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Prevent elastic bouncing and improve mobile touch response */
-        html, body {
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none;
-            background-color: #f9f8f5;
         }
 
         /* Smooth eye-soothing sage scrollbar */
@@ -213,7 +193,7 @@
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                     <span>ซิงค์ข้อมูลเดี๋ยวนี้</span>
                 </button>
-                <a href="https://docs.google.com/spreadsheets/d/1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1 border border-stone-200 transition" title="เปิด Google Sheets ในแท็บใหม่">
+                <a href="https://docs.google.com/spreadsheets/d/1v_954b21o1ldgUI9fQksR9Xp2QltOXlUx5d4wOFbD0o/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1 border border-stone-200 transition" title="เปิด Google Sheets ในแท็บใหม่">
                     <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                     <span class="hidden sm:inline">เปิดตาราง</span>
                 </a>
@@ -863,12 +843,12 @@
                 <div class="bg-emerald-50/80 p-3.5 rounded-2xl border border-emerald-200/90 text-xs sm:text-sm space-y-2">
                     <div class="flex justify-between items-center font-bold text-emerald-950">
                         <span class="flex items-center gap-1.5"><span>🔗</span> สเปรดชีตที่เชื่อมต่อ:</span>
-                        <a href="https://docs.google.com/spreadsheets/d/1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g/edit?gid=0#gid=0" target="_blank" class="text-emerald-700 underline flex items-center gap-1 font-bold">
+                        <a href="https://docs.google.com/spreadsheets/d/1v_954b21o1ldgUI9fQksR9Xp2QltOXlUx5d4wOFbD0o/edit?gid=0#gid=0" target="_blank" class="text-emerald-700 underline flex items-center gap-1 font-bold">
                             <span>เปิด Sheet ↗</span>
                         </a>
                     </div>
                     <p class="text-stone-600 font-mono text-[11px] bg-white/80 p-2 rounded-xl border border-emerald-100 break-all select-all">
-                        https://docs.google.com/spreadsheets/d/1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g/edit
+                        https://docs.google.com/spreadsheets/d/1v_954b21o1ldgUI9fQksR9Xp2QltOXlUx5d4wOFbD0o/edit
                     </p>
                 </div>
 
@@ -991,8 +971,8 @@ function doPost(e) {
         // State Management variables
         let diaryEntries = [];
         let googleSheetsConfig = {
-            spreadsheetUrl: "https://docs.google.com/spreadsheets/d/1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g/edit?gid=0#gid=0",
-            spreadsheetId: "1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g",
+            spreadsheetUrl: "https://docs.google.com/spreadsheets/d/1v_954b21o1ldgUI9fQksR9Xp2QltOXlUx5d4wOFbD0o/edit?gid=0#gid=0",
+            spreadsheetId: "1v_954b21o1ldgUI9fQksR9Xp2QltOXlUx5d4wOFbD0o",
             webhookUrl: "",
             autoSync: true
         };
@@ -1372,7 +1352,7 @@ function doPost(e) {
 กรุณาสรุปจุดที่ต้องเน้นลดเป็นพิเศษ แนะนำตารางการออกกำลังกายแบบตรงจุด 3 ข้อหลัก และทริคการกินอาหารที่ช่วยกระชับสัดส่วนนี้ ตอบเป็นภาษาไทยอย่างกระชับ น่ารัก อ่านง่าย มีอิโมจิสดใส`;
 
             const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -1478,7 +1458,7 @@ function doPost(e) {
 }`;
 
             const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             const payload = {
                 contents: [{
@@ -1603,7 +1583,7 @@ function doPost(e) {
 }`;
 
             const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             try {
                 const response = await fetch(apiUrl, {
