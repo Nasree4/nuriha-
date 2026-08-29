@@ -267,9 +267,9 @@
 
     <script>
         // =====================================================================
-        // 🔑 ใส่ API KEY ของคุณที่นี่ (คัดลอกมาวางในเครื่องหมายคำพูด)
+        // 🔑 ใส่ API KEY ของคุณที่นี่ (เอาข้อความ AIzaSy... มาวางในเครื่องหมายคำพูดด้านล่างนี้)
         // =====================================================================
-        const GEMINI_API_KEY = "AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx"; 
+        const GEMINI_API_KEY = "ใส่_API_KEY_ตรงนี้"; 
         // =====================================================================
 
         let diaryEntries = [];
@@ -281,7 +281,7 @@
 
         // Sheets functions
         function loadSheetsConfig() { const s = localStorage.getItem('nutri_sheets_config'); if(s) Object.assign(googleSheetsConfig, JSON.parse(s)); document.getElementById('sheets-webhook-url').value = googleSheetsConfig.webhookUrl; document.getElementById('sheets-auto-sync').checked = googleSheetsConfig.autoSync; updateSheetsStatusBadge(); }
-        function saveSheetsConfig() { googleSheetsConfig.webhookUrl = document.getElementById('sheets-webhook-url').value.trim(); googleSheetsConfig.autoSync = document.getElementById('sheets-auto-sync').checked; localStorage.setItem('nutri_sheets_config', JSON.stringify(googleSheetsConfig)); updateSheetsStatusBadge(); closeSheetsModal(); showToast("บันทึกตังค่าแล้ว"); }
+        function saveSheetsConfig() { googleSheetsConfig.webhookUrl = document.getElementById('sheets-webhook-url').value.trim(); googleSheetsConfig.autoSync = document.getElementById('sheets-auto-sync').checked; localStorage.setItem('nutri_sheets_config', JSON.stringify(googleSheetsConfig)); updateSheetsStatusBadge(); closeSheetsModal(); showToast("บันทึกตั้งค่าแล้ว"); }
         function updateSheetsStatusBadge() { const b = document.getElementById('sheets-sync-status-badge'); if(b) { b.innerText = googleSheetsConfig.webhookUrl ? "เชื่อมต่อ Webhook แล้ว" : "รอใส่ Webhook"; b.className = googleSheetsConfig.webhookUrl ? "text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800" : "text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900"; } }
         function openSheetsModal() { document.getElementById('sheets-modal').classList.remove('hidden'); }
         function closeSheetsModal() { document.getElementById('sheets-modal').classList.add('hidden'); }
@@ -310,10 +310,10 @@
         function showToast(msg, type='success') {
             const c = document.getElementById('toast-container');
             const t = document.createElement('div');
-            t.className = `bg-white border text-sm font-bold px-4 py-3 rounded-2xl flex gap-2 pointer-events-auto shadow-lg mb-2`;
+            t.className = `bg-white border text-sm font-bold px-4 py-3 rounded-2xl flex gap-2 pointer-events-auto shadow-lg mb-2 ${type==='error'?'border-red-400 text-red-600':''}`;
             t.innerHTML = `<span>${type==='success'?'🌿':'⚠️'}</span><span>${msg}</span>`;
             c.appendChild(t);
-            setTimeout(() => { t.style.opacity = 0; setTimeout(()=>t.remove(),300); }, 3000);
+            setTimeout(() => { t.style.opacity = 0; setTimeout(()=>t.remove(),300); }, 5000);
         }
         function updateDateDisplay() { document.getElementById('date-display').innerText = new Date().toLocaleDateString('th-TH', {weekday:'short', month:'short', day:'numeric'}); }
 
@@ -344,22 +344,28 @@
             document.getElementById('stat-fat').innerText = fat; document.getElementById('progress-fat').style.width = `${Math.min(100, (fat/(userProfile.targetCalories*0.25/9))*100)}%`;
         }
 
-        // Gemini AI Logic
+        // Gemini AI Logic (Updated Model to gemini-1.5-flash with error catching)
         async function analyzeFoodTextWithGemini() {
-            if(!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx") return showToast("กรุณาใส่ API Key ในโค้ดก่อนใช้งาน AI จ้า", "error");
+            if(!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx") return showToast("กรุณาใส่ API Key ในโค้ด (บรรทัด 464) ก่อนใช้งานจ้า", "error");
             const input = document.getElementById('text-ai-input');
             const txt = input.value.trim(); if(!txt) return;
             const btn = document.getElementById('btn-text-ai'); btn.innerHTML = "กำลังคิด..."; btn.disabled = true;
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
-            const prompt = `ประเมินรายการอาหารจาก: "${txt}". ตอบ JSON: {"name":"ชื่อ","calories":350,"protein":15,"carbs":40,"fat":10,"mealType":"lunch"}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+            const prompt = `ประเมินรายการอาหารจาก: "${txt}". ตอบ JSON ล้วนๆ รูปแบบนี้เท่านั้น: {"name":"ชื่อ","calories":350,"protein":15,"carbs":40,"fat":10,"mealType":"lunch"}`;
             try {
                 const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{responseMimeType:"application/json"}}) });
                 const data = await res.json();
+                
+                if(!res.ok) throw new Error(data.error?.message || "เกิดข้อผิดพลาดจาก API");
+                
                 const j = JSON.parse(data.candidates[0].content.parts[0].text);
                 addFoodItem({id:Date.now(), name:j.name, calories:j.calories, protein:j.protein, carbs:j.carbs, fat:j.fat, mealType:j.mealType});
                 input.value = ''; showToast(`บันทึก ${j.name} แล้ว!`);
-            } catch(e) { showToast("เชื่อมต่อ AI ล้มเหลว", "error"); }
+            } catch(e) { 
+                console.error(e);
+                showToast(`Error: ${e.message}`, "error"); 
+            }
             btn.innerHTML = "✨ คำนวณ"; btn.disabled = false;
         }
 
@@ -374,17 +380,24 @@
                 document.getElementById('food-image-preview').classList.remove('hidden');
                 if(!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx") {
                     document.getElementById('image-analyzing-spinner').classList.add('hidden');
-                    return showToast("AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx", "error");
+                    return showToast("กรุณาใส่ API Key ในโค้ด (บรรทัด 464) ก่อนใช้งาน", "error");
                 }
                 const b64 = ev.target.result.split(',')[1];
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 try {
-                    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:`ประเมินรูปอาหารนี้ ตอบเป็น JSON: {"name":"ชื่อ","calories":450,"protein":20,"carbs":50,"fat":15,"mealType":"lunch","notes":"แนะนำสั้นๆ"}`},{inlineData:{mimeType:file.type, data:b64}}]}], generationConfig:{responseMimeType:"application/json"}}) });
+                    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:`ประเมินรูปอาหารนี้ ตอบเป็น JSON ล้วนๆ รูปแบบนี้เท่านั้น: {"name":"ชื่อ","calories":450,"protein":20,"carbs":50,"fat":15,"mealType":"lunch","notes":"แนะนำสั้นๆ"}`},{inlineData:{mimeType:file.type, data:b64}}]}], generationConfig:{responseMimeType:"application/json"}}) });
                     const data = await res.json();
+                    
+                    if(!res.ok) throw new Error(data.error?.message || "เกิดข้อผิดพลาดจาก API");
+
                     const j = JSON.parse(data.candidates[0].content.parts[0].text);
                     document.getElementById('img-ai-name').value = j.name; document.getElementById('img-ai-cal').value = j.calories; document.getElementById('img-ai-protein').value = j.protein; document.getElementById('img-ai-carbs').value = j.carbs; document.getElementById('img-ai-fat').value = j.fat; document.getElementById('img-ai-meal-type').value = j.mealType; document.getElementById('img-ai-notes-text').innerText = j.notes;
                     document.getElementById('image-analyzing-spinner').classList.add('hidden'); document.getElementById('image-analysis-details').classList.remove('hidden');
-                } catch(err) { showToast("วิเคราะห์รูปไม่สำเร็จ", "error"); document.getElementById('image-analyzing-spinner').classList.add('hidden'); }
+                } catch(err) { 
+                    console.error(err);
+                    showToast(`Error: ${err.message}`, "error"); 
+                    document.getElementById('image-analyzing-spinner').classList.add('hidden'); 
+                }
             }; r.readAsDataURL(file); e.target.value='';
         }
         function closeImageAnalysis() { document.getElementById('image-analysis-container').classList.add('hidden'); }
@@ -394,15 +407,21 @@
         }
 
         async function getAiBodyReductionPlan() {
-            if(!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx") return showToast("AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx", "error");
+            if(!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx") return showToast("กรุณาใส่ API Key ก่อนใช้งานจ้า", "error");
             readBodyMetricsFromInputs(); const btn = document.getElementById('btn-ai-body-plan'); btn.innerHTML = "กำลังวิเคราะห์..."; btn.disabled=true;
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
             try {
                 const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:`แนะนำการลดสัดส่วนให้ เพศ:${userProfile.gender} อก:${bodyMetrics.chestCurrent}->${bodyMetrics.chestTarget} เอว:${bodyMetrics.waistCurrent}->${bodyMetrics.waistTarget} สะโพก:${bodyMetrics.hipsCurrent}->${bodyMetrics.hipsTarget} ตอบสั้นๆ มีอิโมจิ`}]}]}) });
                 const data = await res.json();
+                
+                if(!res.ok) throw new Error(data.error?.message || "เกิดข้อผิดพลาดจาก API");
+
                 document.getElementById('ai-body-plan-text').innerText = data.candidates[0].content.parts[0].text;
                 document.getElementById('ai-body-plan-container').classList.remove('hidden');
-            } catch(e) { showToast("สร้างแผนไม่สำเร็จ", "error"); }
+            } catch(e) { 
+                console.error(e);
+                showToast(`Error: ${e.message}`, "error"); 
+            }
             btn.innerHTML = "✨ วิเคราะห์ด้วย AI"; btn.disabled=false;
         }
 
