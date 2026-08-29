@@ -171,10 +171,17 @@
                         <span class="text-lg">🧸</span>
                         <span>ตั้งค่าโปรไฟล์</span>
                     </button>
+                    <button onclick="openSheetsModal()" class="px-3.5 py-2.5 rounded-xl text-sm font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 transition flex items-center gap-1.5 shadow-sm">
+                        <span class="text-lg">📗</span>
+                        <span>Google Sheets</span>
+                    </button>
                 </nav>
 
                 <!-- Mobile Quick Action -->
-                <div class="flex items-center gap-2 md:hidden">
+                <div class="flex items-center gap-1.5 md:hidden">
+                    <button onclick="openSheetsModal()" class="bg-emerald-50 text-emerald-800 p-2 rounded-xl text-xs font-bold border border-emerald-200" title="เชื่อมต่อ Google Sheets">
+                        <span class="text-base">📗</span>
+                    </button>
                     <button onclick="document.getElementById('food-image-input').click()" class="bg-gradient-to-r from-emerald-600 to-teal-600 active:scale-95 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-soothe-btn flex items-center gap-1.5">
                         <span class="text-base">📸</span>
                         <span class="font-bold">สแกนอาหาร</span>
@@ -183,7 +190,39 @@
             </div>
         </div>
     </header>
-<!-- ... existing code -->
+
+    <!-- Main App Container -->
+    <main class="max-w-5xl mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full pb-28 md:pb-12">
+
+        <!-- Google Sheets Quick Sync Status Banner -->
+        <div class="mb-4 bg-white/90 backdrop-blur-sm border border-emerald-200/80 rounded-2xl p-3.5 sm:p-4 shadow-soothe-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100/80 flex items-center justify-center text-xl shrink-0 border border-emerald-200">
+                    📗
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs sm:text-sm font-bold text-slate-800">เชื่อมต่อกับ Google Sheets</span>
+                        <span id="sheets-sync-status-badge" class="text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">พร้อมใช้งาน</span>
+                    </div>
+                    <p class="text-xs text-stone-500 font-medium line-clamp-1">บันทึกอาหาร & สัดส่วนร่างกายซิงค์ตรงสู่ตารางของคุณ</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="syncAllToGoogleSheets()" id="btn-quick-sync" class="flex-1 sm:flex-none px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>ซิงค์ข้อมูลเดี๋ยวนี้</span>
+                </button>
+                <a href="https://docs.google.com/spreadsheets/d/1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1 border border-stone-200 transition" title="เปิด Google Sheets ในแท็บใหม่">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    <span class="hidden sm:inline">เปิดตาราง</span>
+                </a>
+                <button onclick="openSheetsModal()" class="p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs sm:text-sm font-bold border border-stone-200 transition" title="ตั้งค่าการเชื่อมต่อ">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+
         <!-- ==================== TAB 1: DIARY & AI SCANNER ==================== -->
         <div id="tab-diary" class="space-y-4 sm:space-y-6">
 
@@ -803,9 +842,136 @@
     <!-- Custom Toast Message Notification Container -->
     <div id="toast-container" class="fixed bottom-20 md:bottom-5 right-4 left-4 md:left-auto md:right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- Google Sheets Integration & Setup Modal -->
+    <div id="sheets-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl p-5 sm:p-7 max-w-xl w-full shadow-2xl border border-stone-200 my-8 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl sm:text-3xl">📗</span>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-black text-slate-800">ตั้งค่าเชื่อมต่อ Google Sheets</h3>
+                        <p class="text-xs text-stone-500 font-medium">บันทึกอาหารและสัดส่วนร่างกายลงชีตอัตโนมัติ</p>
+                    </div>
+                </div>
+                <button onclick="closeSheetsModal()" class="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 active:scale-95 text-stone-500 hover:text-slate-800 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3.5">
+                <!-- Connected Spreadsheet Info -->
+                <div class="bg-emerald-50/80 p-3.5 rounded-2xl border border-emerald-200/90 text-xs sm:text-sm space-y-2">
+                    <div class="flex justify-between items-center font-bold text-emerald-950">
+                        <span class="flex items-center gap-1.5"><span>🔗</span> สเปรดชีตที่เชื่อมต่อ:</span>
+                        <a href="https://docs.google.com/spreadsheets/d/1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g/edit?gid=0#gid=0" target="_blank" class="text-emerald-700 underline flex items-center gap-1 font-bold">
+                            <span>เปิด Sheet ↗</span>
+                        </a>
+                    </div>
+                    <p class="text-stone-600 font-mono text-[11px] bg-white/80 p-2 rounded-xl border border-emerald-100 break-all select-all">
+                        https://docs.google.com/spreadsheets/d/1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g/edit
+                    </p>
+                </div>
+
+                <!-- Webhook URL Input -->
+                <div class="space-y-1.5">
+                    <label class="text-xs sm:text-sm font-bold text-slate-800 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><span>⚡</span> Google Apps Script Webhook URL</span>
+                        <span class="text-[11px] text-stone-400 font-normal">(อัปเดตแบบเรียลไทม์)</span>
+                    </label>
+                    <input type="url" id="sheets-webhook-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2.5 border border-stone-200 rounded-xl text-xs sm:text-sm font-mono focus:ring-2 focus:ring-emerald-300 focus:outline-none bg-stone-50">
+                    <p class="text-[11px] text-stone-500 font-medium">หากใส่ Webhook URL ข้อมูลที่สแกนหรือบันทึกจะส่งเข้าตาราง Google Sheet ของคุณทันที</p>
+                </div>
+
+                <!-- Auto-Sync Toggle -->
+                <div class="flex items-center justify-between p-3 bg-stone-50 rounded-2xl border border-stone-200">
+                    <div>
+                        <span class="text-xs sm:text-sm font-bold text-slate-800 block">ซิงค์อัตโนมัติเมื่อบันทึกอาหาร / สัดส่วน</span>
+                        <span class="text-[11px] text-stone-500">บันทึกหรือลบรายการจะส่งขึ้น Google Sheets ทันที</span>
+                    </div>
+                    <input type="checkbox" id="sheets-auto-sync" class="w-5 h-5 accent-emerald-600 rounded cursor-pointer" checked>
+                </div>
+
+                <!-- Export CSV Alternative -->
+                <div class="p-3 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs sm:text-sm font-bold text-amber-950 flex items-center gap-1.5">
+                            <span>📥</span> ดาวน์โหลดไฟล์สำรอง (CSV / Excel)
+                        </span>
+                        <button onclick="downloadDiaryCSV()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                            <i class="fa-solid fa-file-csv"></i> ดาวน์โหลด CSV
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-amber-900 leading-relaxed font-medium">สามารถดาวน์โหลดเป็นไฟล์ .CSV เพื่อนำไปกด Import (ไฟล์ > นำเข้า) ใน Google Sheets ของคุณได้ทันทีเช่นกัน</p>
+                </div>
+
+                <!-- Instructions Accordion / Script Helper -->
+                <details class="group bg-stone-50 rounded-2xl border border-stone-200 p-3 text-xs sm:text-sm">
+                    <summary class="font-bold text-slate-800 cursor-pointer flex justify-between items-center select-none">
+                        <span class="flex items-center gap-1.5"><span>📋</span> ดูโค้ด Google Apps Script (สำหรับรับข้อมูลเข้า Sheet)</span>
+                        <span class="text-stone-400 group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div class="pt-3 space-y-2 text-stone-700">
+                        <p class="text-xs leading-relaxed">
+                            1. เปิด Google Sheet ของคุณ ไปที่เมนู <strong>ส่วนขยาย (Extensions)</strong> &gt; <strong>Apps Script</strong><br>
+                            2. ลบโค้ดเดิมแล้ววางโค้ดด้านล่างนี้ลงไป แล้วกด <strong>บันทึก (Save)</strong><br>
+                            3. กดปุ่ม <strong>ทำให้ใช้งานได้ (Deploy)</strong> &gt; <strong>การทำให้ใช้งานได้ใหม่ (New deployment)</strong> &gt; เลือกประเภท <strong>เว็บแอป (Web App)</strong> &gt; สิทธิ์เข้าถึงเลือก <strong>"ทุกคน (Anyone)"</strong> &gt; คัดลอก URL มาวางในช่องด้านบน
+                        </p>
+                        <div class="relative">
+                            <pre class="bg-stone-900 text-emerald-400 p-3 rounded-xl text-[11px] font-mono overflow-x-auto max-h-40 selection:bg-emerald-800 selection:text-white" id="gas-code-snippet">function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    if (data.type === 'food_entry') {
+      var sheet = ss.getSheetByName('FoodLog') || ss.insertSheet('FoodLog');
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(['Timestamp', 'Name', 'Calories (kcal)', 'Protein (g)', 'Carbs (g)', 'Fat (g)', 'MealType']);
+      }
+      data.items.forEach(function(item) {
+        sheet.appendRow([new Date(), item.name, item.calories, item.protein, item.carbs, item.fat, item.mealType]);
+      });
+    } else if (data.type === 'body_metrics') {
+      var sheet = ss.getSheetByName('BodyMetrics') || ss.insertSheet('BodyMetrics');
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(['Timestamp', 'Chest(cm)', 'Arm(cm)', 'Waist(cm)', 'Hips(cm)', 'Thigh(cm)', 'WHR']);
+      }
+      var m = data.metrics;
+      sheet.appendRow([new Date(), m.chestCurrent, m.armCurrent, m.waistCurrent, m.hipsCurrent, m.thighCurrent, data.whr || '']);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({status: 'success'})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+                            <button onclick="copyGasCode()" class="absolute top-2 right-2 px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-[10px] font-bold backdrop-blur-sm transition">
+                                <i class="fa-solid fa-copy"></i> คัดลอกโค้ด
+                            </button>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="flex justify-between items-center gap-2 pt-2 border-t border-stone-100">
+                <button onclick="syncAllToGoogleSheets()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-soothe-btn transition">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> ซิงค์ข้อมูลทั้งหมดตอนนี้
+                </button>
+                <button onclick="saveSheetsConfig()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-bold transition">
+                    บันทึกการตั้งค่า
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State Management variables
         let diaryEntries = [];
+        let googleSheetsConfig = {
+            spreadsheetUrl: "https://docs.google.com/spreadsheets/d/1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g/edit?gid=0#gid=0",
+            spreadsheetId: "1OWnfAExhuFBSwxhRUJeCRuDLoKz4Z20bpFX02T39H7g",
+            webhookUrl: "",
+            autoSync: true
+        };
         let bodyMetrics = {
             chestCurrent: 85, chestTarget: 82,
             armCurrent: 27, armTarget: 25,
@@ -830,10 +996,184 @@
             loadUserProfile();
             loadDiaryEntries();
             loadBodyMetrics();
+            loadSheetsConfig();
             updateDashboard();
             updateDateDisplay();
             updateMetricsDisplay();
         };
+
+        // Google Sheets Integration Logic
+        function loadSheetsConfig() {
+            const saved = localStorage.getItem('nutri_sheets_config');
+            if (saved) {
+                try {
+                    googleSheetsConfig = Object.assign(googleSheetsConfig, JSON.parse(saved));
+                } catch (e) {}
+            }
+            const webhookInput = document.getElementById('sheets-webhook-url');
+            const autoSyncCheck = document.getElementById('sheets-auto-sync');
+            if (webhookInput) webhookInput.value = googleSheetsConfig.webhookUrl || '';
+            if (autoSyncCheck) autoSyncCheck.checked = googleSheetsConfig.autoSync !== false;
+            updateSheetsStatusBadge();
+        }
+
+        function saveSheetsConfig() {
+            const webhookInput = document.getElementById('sheets-webhook-url');
+            const autoSyncCheck = document.getElementById('sheets-auto-sync');
+            if (webhookInput) googleSheetsConfig.webhookUrl = webhookInput.value.trim();
+            if (autoSyncCheck) googleSheetsConfig.autoSync = autoSyncCheck.checked;
+            
+            localStorage.setItem('nutri_sheets_config', JSON.stringify(googleSheetsConfig));
+            updateSheetsStatusBadge();
+            closeSheetsModal();
+            showToast("บันทึกการตั้งค่า Google Sheets เรียบร้อยแล้ว! 📗");
+        }
+
+        function updateSheetsStatusBadge() {
+            const badge = document.getElementById('sheets-sync-status-badge');
+            if (!badge) return;
+            if (googleSheetsConfig.webhookUrl) {
+                badge.className = "text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+                badge.innerText = "⚡ Real-Time Webhook เชื่อมต่อแล้ว";
+            } else {
+                badge.className = "text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900";
+                badge.innerText = "📗 ตารางพร้อม (เปิดใช้งาน Webhook ได้)";
+            }
+        }
+
+        function openSheetsModal() {
+            loadSheetsConfig();
+            const modal = document.getElementById('sheets-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeSheetsModal() {
+            const modal = document.getElementById('sheets-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function copyGasCode() {
+            const code = document.getElementById('gas-code-snippet')?.innerText || '';
+            if (!code) return;
+            
+            const temp = document.createElement('textarea');
+            temp.value = code;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast("คัดลอกโค้ด Google Apps Script แล้ว! 📋");
+        }
+
+        async function postToGoogleSheetsWebhook(payload) {
+            if (!googleSheetsConfig.webhookUrl) return false;
+            try {
+                await fetch(googleSheetsConfig.webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                return true;
+            } catch (err) {
+                console.error("Failed to post to Google Sheets webhook:", err);
+                return false;
+            }
+        }
+
+        async function syncAllToGoogleSheets() {
+            const btn = document.getElementById('btn-quick-sync');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>กำลังซิงค์...</span>`;
+            }
+
+            readBodyMetricsFromInputs();
+
+            if (!googleSheetsConfig.webhookUrl) {
+                // If webhook is not configured yet, offer CSV download and instructions
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+                openSheetsModal();
+                showToast("ใส่ Google Apps Script Webhook URL เพื่อซิงค์อัตโนมัติ หรือกดดาวน์โหลด CSV ได้เลยจ้า 📗");
+                return;
+            }
+
+            try {
+                // 1. Sync Food Log
+                if (diaryEntries.length > 0) {
+                    await postToGoogleSheetsWebhook({
+                        type: 'food_entry',
+                        timestamp: new Date().toISOString(),
+                        items: diaryEntries
+                    });
+                }
+
+                // 2. Sync Body Metrics
+                const waist = bodyMetrics.waistCurrent;
+                const hips = bodyMetrics.hipsCurrent;
+                const whr = (waist > 0 && hips > 0) ? (waist / hips).toFixed(2) : '-';
+
+                await postToGoogleSheetsWebhook({
+                    type: 'body_metrics',
+                    timestamp: new Date().toISOString(),
+                    metrics: bodyMetrics,
+                    whr: whr
+                });
+
+                showToast("ซิงค์ข้อมูลทั้งหมดลง Google Sheets เรียบร้อยแล้ว! 📗✨");
+            } catch (err) {
+                console.error(err);
+                showToast("การส่งข้อมูลขัดข้อง กรุณาตรวจสอบ Webhook URL", "error");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            }
+        }
+
+        function downloadDiaryCSV() {
+            readBodyMetricsFromInputs();
+            
+            // Generate CSV content with UTF-8 BOM so Thai characters render properly in Excel & Google Sheets
+            let csv = '\uFEFF';
+            csv += '--- บันทึกรายการอาหาร (Food Diary Log) ---\n';
+            csv += 'วันที่และเวลา,ชื่ออาหาร,มื้ออาหาร,พลังงาน (kcal),โปรตีน (g),คาร์บ (g),ไขมัน (g)\n';
+
+            const nowStr = new Date().toLocaleString('th-TH');
+            if (diaryEntries.length === 0) {
+                csv += `${nowStr},ยังไม่มีรายการอาหาร,-,0,0,0,0\n`;
+            } else {
+                diaryEntries.forEach(item => {
+                    const cleanName = `"${(item.name || '').replace(/"/g, '""')}"`;
+                    csv += `${nowStr},${cleanName},${item.mealType || 'lunch'},${item.calories || 0},${item.protein || 0},${item.carbs || 0},${item.fat || 0}\n`;
+                });
+            }
+
+            csv += '\n--- ข้อมูลสัดส่วนร่างกาย (Body Measurements) ---\n';
+            csv += 'สัดส่วน,ปัจจุบัน (cm),เป้าหมาย (cm),ส่วนต่าง\n';
+            csv += `รอบอก,${bodyMetrics.chestCurrent || '-'},${bodyMetrics.chestTarget || '-'}\n`;
+            csv += `ต้นแขน,${bodyMetrics.armCurrent || '-'},${bodyMetrics.armTarget || '-'}\n`;
+            csv += `รอบเอว,${bodyMetrics.waistCurrent || '-'},${bodyMetrics.waistTarget || '-'}\n`;
+            csv += `สะโพก,${bodyMetrics.hipsCurrent || '-'},${bodyMetrics.hipsTarget || '-'}\n`;
+            csv += `ต้นขา,${bodyMetrics.thighCurrent || '-'},${bodyMetrics.thighTarget || '-'}\n`;
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `NutriVision_GoogleSheets_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast("ดาวน์โหลดไฟล์ CSV สำหรับนำเข้า Google Sheets สำเร็จแล้ว! 📥");
+        }
 
         function updateDateDisplay() {
             const today = new Date();
@@ -902,7 +1242,42 @@
             readBodyMetricsFromInputs();
             localStorage.setItem('nutri_body_metrics', JSON.stringify(bodyMetrics));
             updateMetricsDisplay();
+            
+            // Trigger auto-sync to Google Sheets if enabled
+            if (googleSheetsConfig.autoSync && googleSheetsConfig.webhookUrl) {
+                const waist = bodyMetrics.waistCurrent;
+                const hips = bodyMetrics.hipsCurrent;
+                const whr = (waist > 0 && hips > 0) ? (waist / hips).toFixed(2) : '-';
+                postToGoogleSheetsWebhook({
+                    type: 'body_metrics',
+                    timestamp: new Date().toISOString(),
+                    metrics: bodyMetrics,
+                    whr: whr
+                });
+            }
+
             showToast("บันทึกเป้าหมายและสัดส่วนเรียบร้อยแล้ว! 🎀");
+        }
+
+        function readBodyMetricsFromInputs() {
+            const chestCurrent = parseFloat(document.getElementById('m-chest-current')?.value) || 0;
+            const chestTarget = parseFloat(document.getElementById('m-chest-target')?.value) || 0;
+            const armCurrent = parseFloat(document.getElementById('m-arm-current')?.value) || 0;
+            const armTarget = parseFloat(document.getElementById('m-arm-target')?.value) || 0;
+            const waistCurrent = parseFloat(document.getElementById('m-waist-current')?.value) || 0;
+            const waistTarget = parseFloat(document.getElementById('m-waist-target')?.value) || 0;
+            const hipsCurrent = parseFloat(document.getElementById('m-hips-current')?.value) || 0;
+            const hipsTarget = parseFloat(document.getElementById('m-hips-target')?.value) || 0;
+            const thighCurrent = parseFloat(document.getElementById('m-thigh-current')?.value) || 0;
+            const thighTarget = parseFloat(document.getElementById('m-thigh-target')?.value) || 0;
+
+            bodyMetrics = {
+                chestCurrent, chestTarget,
+                armCurrent, armTarget,
+                waistCurrent, waistTarget,
+                hipsCurrent, hipsTarget,
+                thighCurrent, thighTarget
+            };
         }
 
         function formatDiff(current, target) {
@@ -1247,6 +1622,15 @@
             diaryEntries.push(item);
             saveDiaryEntries();
             updateDashboard();
+
+            // Trigger auto-sync to Google Sheets if enabled
+            if (googleSheetsConfig.autoSync && googleSheetsConfig.webhookUrl) {
+                postToGoogleSheetsWebhook({
+                    type: 'food_entry',
+                    timestamp: new Date().toISOString(),
+                    items: [item]
+                });
+            }
         }
 
         function deleteFoodItem(id) {
