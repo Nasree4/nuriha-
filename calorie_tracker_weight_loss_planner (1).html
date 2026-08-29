@@ -1,1232 +1,1382 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full bg-rose-50/30">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calorie Tracker & Weight Loss Planner</title>
+    <title>NutriVision AI - บันทึกแคลอรี่ & สแกนอาหารสุดน่ารัก</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Itim, Kanit, and Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Kanit:wght@300;400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind Custom Configuration for Pastel Colors -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Itim', 'Kanit', 'Quicksand', 'sans-serif'],
+                    },
                     colors: {
                         pastel: {
-                            pink: '#FFB6C1',
-                            rose: '#FFD1DC',
-                            lightpink: '#FFF0F5',
-                            purple: '#E6E6FA',
-                            mint: '#D8F3DC',
-                            sky: '#E0F4FF',
-                            peach: '#FFE5EC',
-                            yellow: '#FFF9C4',
-                            text: '#5D5061',
-                            subtext: '#8E7DBE',
-                            brand: '#FF70A6',
-                            brandDark: '#E0528A'
+                            pink: '#ffd1dc',
+                            pinkDark: '#f472b6',
+                            rose: '#ffe4e6',
+                            cream: '#fffbeb',
+                            mint: '#d1fae5',
+                            mintDark: '#34d399',
+                            sky: '#e0f2fe',
+                            skyDark: '#38bdf8',
+                            lavender: '#f3e8ff',
+                            lavenderDark: '#c084fc',
+                            peach: '#ffedd5',
+                            peachDark: '#fb923c',
+                            yellow: '#fef08a'
                         }
                     },
-                    fontFamily: {
-                        sans: ['Kanit', 'sans-serif'],
-                    },
-                    borderRadius: {
-                        '4xl': '2rem',
+                    boxShadow: {
+                        'cute': '0 8px 24px -4px rgba(244, 114, 182, 0.15), 0 4px 12px -2px rgba(251, 146, 60, 0.1)',
+                        'cute-card': '0 6px 20px -2px rgba(192, 132, 252, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.04)',
+                        'cute-btn': '0 4px 14px rgba(244, 114, 182, 0.35)',
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Kanit', sans-serif; 
-            background: linear-gradient(135deg, #fff5f8 0%, #f7f3ff 100%);
+        /* Smooth pastel scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #fff0f3; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ffd1dc; border-radius: 10px; }
-        .cute-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 2px solid #FFE5EC;
-            box-shadow: 0 10px 25px -5px rgba(255, 182, 193, 0.2);
+        ::-webkit-scrollbar-track {
+            background: #fdf2f8;
+            border-radius: 9999px;
         }
-        .cute-btn {
-            transition: all 0.2s ease;
+        ::-webkit-scrollbar-thumb {
+            background: #fbcfe8;
+            border-radius: 9999px;
+            border: 2px solid #fdf2f8;
         }
-        .cute-btn:hover {
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f472b6;
+        }
+        
+        .cute-tab-btn {
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .cute-tab-btn.active {
+            background-color: #fce7f3;
+            color: #db2777;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(244, 114, 182, 0.2);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(255, 112, 166, 0.3);
         }
-        .cute-btn:active {
-            transform: translateY(0);
+        
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: float-slow 4s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="text-pastel-text min-h-screen flex flex-col">
+<body class="h-full bg-gradient-to-br from-rose-50/60 via-pink-50/30 to-purple-50/40 text-slate-700 antialiased flex flex-col justify-between selection:bg-pink-200 selection:text-pink-900">
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-white/95 text-pastel-text px-5 py-3.5 rounded-3xl shadow-lg border-2 border-pastel-rose flex items-center gap-3 pointer-events-none">
-        <span class="text-lg">✨</span>
-        <span id="toast-message" class="text-sm font-semibold">ข้อความแจ้งเตือน</span>
-    </div>
-
-    <!-- Top Navigation Bar -->
-    <header class="bg-white/80 backdrop-blur-md border-b-2 border-pastel-peach sticky top-0 z-40 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pastel-pink to-pastel-rose flex items-center justify-center text-white shadow-md text-xl">
-                    🎀
+    <!-- Navigation Header -->
+    <header class="bg-white/85 backdrop-blur-md border-b border-pink-100 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-18 py-2">
+                <!-- Logo & Mascot -->
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="switchTab('diary')">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pink-300 via-rose-300 to-amber-200 flex items-center justify-center text-2xl shadow-cute group-hover:scale-105 transition-transform animate-float">
+                        🥑
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h1 class="text-xl font-bold text-slate-800 leading-tight tracking-tight">NutriCute <span class="text-pink-500 font-extrabold">AI</span></h1>
+                            <span class="text-base">✨</span>
+                        </div>
+                        <p class="text-xs text-pink-400 font-medium">ไดอารี่แคลอรี่ & วิเคราะห์อาหารสุดคิ้วท์</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold text-pastel-brand flex items-center gap-1.5 leading-tight">
-                        NutriFit Daily <span class="text-xs bg-pastel-peach text-pastel-brand px-2 py-0.5 rounded-full font-normal">Pastel Mode ✨</span>
-                    </h1>
-                    <p class="text-xs text-slate-400 font-medium">บันทึกอาหาร & ดูแลหุ่นแบบน่ารักๆ 🍓</p>
-                </div>
-            </div>
 
-            <!-- Date Selector -->
-            <div class="flex items-center gap-2 bg-pastel-peach/50 hover:bg-pastel-peach px-3.5 py-1.5 rounded-full border border-pastel-rose/60 text-xs font-semibold text-pastel-brand transition">
-                <span>🗓️</span>
-                <input type="date" id="current-date-picker" onchange="handleDateChange(this.value)" class="bg-transparent text-pastel-text focus:outline-none cursor-pointer font-medium">
+                <!-- Navigation Tabs with Cartoon Icons -->
+                <nav class="flex space-x-1 sm:space-x-2 bg-pink-50/60 p-1.5 rounded-2xl border border-pink-100/80">
+                    <button onclick="switchTab('diary')" id="tab-btn-diary" class="cute-tab-btn active px-3.5 py-2 rounded-xl text-xs sm:text-sm text-slate-600 hover:text-pink-600 transition flex items-center gap-1.5 font-medium">
+                        <span class="text-base">🍱</span>
+                        <span>ไดอารี่</span>
+                    </button>
+                    <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="cute-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm text-slate-600 hover:text-pink-600 transition flex items-center gap-1.5 font-medium">
+                        <span class="text-base">📊</span>
+                        <span>วิเคราะห์เป้า</span>
+                    </button>
+                    <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="cute-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm text-slate-600 hover:text-pink-600 transition flex items-center gap-1.5 font-medium">
+                        <span class="text-base">🎀</span>
+                        <span>สัดส่วนร่างกาย</span>
+                    </button>
+                    <button onclick="switchTab('profile')" id="tab-btn-profile" class="cute-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm text-slate-600 hover:text-pink-600 transition flex items-center gap-1.5 font-medium">
+                        <span class="text-base">🧸</span>
+                        <span>ตั้งค่าโปรไฟล์</span>
+                    </button>
+                </nav>
             </div>
-        </div>
-
-        <!-- Navigation Tabs -->
-        <div class="max-w-6xl mx-auto px-4 flex space-x-2 border-t border-pastel-peach/40 overflow-x-auto pt-1 pb-1">
-            <button id="tab-dashboard" onclick="switchTab('dashboard')" class="nav-tab py-2 px-4 text-xs sm:text-sm font-bold rounded-2xl transition flex items-center gap-2 whitespace-nowrap bg-pastel-pink text-white shadow-sm">
-                <span>🌸</span> ภาพรวมประจำวัน
-            </button>
-            <button id="tab-log" onclick="switchTab('log')" class="nav-tab py-2 px-4 text-xs sm:text-sm font-bold text-slate-500 hover:text-pastel-brand hover:bg-pastel-peach/40 rounded-2xl transition flex items-center gap-2 whitespace-nowrap">
-                <span>🍰</span> บันทึกอาหาร
-            </button>
-            <button id="tab-goals" onclick="switchTab('goals')" class="nav-tab py-2 px-4 text-xs sm:text-sm font-bold text-slate-500 hover:text-pastel-brand hover:bg-pastel-peach/40 rounded-2xl transition flex items-center gap-2 whitespace-nowrap">
-                <span>🎯</span> เป้าหมาย & สัดส่วน
-            </button>
-            <button id="tab-guide" onclick="switchTab('guide')" class="nav-tab py-2 px-4 text-xs sm:text-sm font-bold text-slate-500 hover:text-pastel-brand hover:bg-pastel-peach/40 rounded-2xl transition flex items-center gap-2 whitespace-nowrap">
-                <span>💡</span> คู่มือลดน้ำหนัก
-            </button>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-grow space-y-6">
+    <main class="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1">
 
-        <!-- TAB 1: DASHBOARD -->
-        <div id="view-dashboard" class="tab-content space-y-6">
-            <!-- Calorie & Energy Summary Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <!-- Target Calorie Card -->
-                <div class="cute-card rounded-3xl p-5 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">เป้าหมายแแคลอรี่ 🎯</span>
-                        <h3 id="dash-target-cal" class="text-2xl font-black text-pastel-text mt-1">-- kcal</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">คำนวณตาม BMR & TDEE</p>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-pastel-sky text-sky-600 flex items-center justify-center text-xl shadow-inner">
-                        🏆
-                    </div>
-                </div>
+        <!-- ==================== TAB 1: DIARY & AI SCANNER ==================== -->
+        <div id="tab-diary" class="space-y-6">
 
-                <!-- Eaten Calorie Card -->
-                <div class="cute-card rounded-3xl p-5 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ทานไปแล้ว 🍱</span>
-                        <h3 id="dash-eaten-cal" class="text-2xl font-black text-pastel-brand mt-1">0 kcal</h3>
-                        <p id="dash-eaten-percent" class="text-[11px] font-bold text-emerald-500 mt-1">0% ของเป้าหมาย</p>
+            <!-- AI Food Scanner Banner (Pastel Gradient with Cute Elements) -->
+            <div class="bg-gradient-to-r from-pink-400 via-rose-300 to-amber-200 rounded-3xl p-6 text-white shadow-cute relative overflow-hidden border border-white/40">
+                <div class="absolute -right-6 -bottom-6 w-36 h-36 bg-white/20 rounded-full blur-xl pointer-events-none"></div>
+                <div class="absolute top-2 right-10 text-4xl opacity-40 animate-pulse">🍰</div>
+                <div class="absolute bottom-2 right-48 text-3xl opacity-30">🍓</div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                    <div class="space-y-1.5 max-w-lg">
+                        <span class="inline-flex items-center gap-1.5 bg-white/30 text-rose-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-sm">
+                            <span>✨</span> Gemini AI Vision & Smart Scan
+                        </span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm flex items-center gap-2">
+                            <span>สแกนจานอาหาร & คำนวณแคลอรี่</span>
+                            <span class="text-2xl">📸</span>
+                        </h2>
+                        <p class="text-pink-950/80 text-xs sm:text-sm font-medium">ถ่ายรูปหรืออัปโหลดอาหารจานโปรด น้อง AI จะช่วยวิเคราะห์สารอาหารและแคลอรี่ให้แบบเป๊ะๆ เลยน้า!</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-pastel-rose text-pastel-brand flex items-center justify-center text-xl shadow-inner">
-                        🥑
-                    </div>
-                </div>
-
-                <!-- Remaining Calorie Card -->
-                <div class="cute-card rounded-3xl p-5 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">คงเหลือ ⚡</span>
-                        <h3 id="dash-remaining-cal" class="text-2xl font-black text-pastel-text mt-1">-- kcal</h3>
-                        <p id="dash-remaining-status" class="text-[11px] font-semibold text-slate-400 mt-1">แคลอรี่ที่ทานได้เพิ่ม</p>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-pastel-yellow text-amber-600 flex items-center justify-center text-xl shadow-inner">
-                        🔥
-                    </div>
-                </div>
-
-                <!-- Water Tracker Card -->
-                <div class="cute-card rounded-3xl p-5">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ดื่มน้ำวันนี้ 💧</span>
-                        <span id="water-count" class="text-xs font-bold text-sky-500">0 / 2,000 ml</span>
-                    </div>
-                    <div class="w-full bg-pastel-sky/60 rounded-full h-3 mb-3 overflow-hidden p-0.5 border border-sky-100">
-                        <div id="water-bar" class="bg-gradient-to-r from-sky-300 to-sky-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="addWater(250)" class="cute-btn flex-1 bg-pastel-sky hover:bg-sky-200 text-sky-700 font-bold py-1.5 px-2 rounded-xl text-xs transition border border-sky-200 flex items-center justify-center gap-1">
-                            <span>💧</span> +250 ml
-                        </button>
-                        <button onclick="resetWater()" class="cute-btn bg-slate-100 hover:bg-slate-200 text-slate-500 py-1.5 px-3 rounded-xl text-xs transition">
-                            <i class="fa-solid fa-rotate-right"></i>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                        <input type="file" id="food-image-input" accept="image/*" capture="environment" onchange="handleFoodImageSelected(event)" class="hidden">
+                        <button onclick="document.getElementById('food-image-input').click()" class="w-full sm:w-auto bg-white text-pink-600 hover:bg-pink-50 active:scale-95 px-6 py-3.5 rounded-2xl font-bold text-sm shadow-cute-btn transition-all duration-200 flex items-center justify-center gap-2.5 border border-pink-100">
+                            <span class="text-xl">📷</span>
+                            <span>ถ่ายรูป / เลือกรูปอาหาร</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Macronutrient Progress Bars -->
-            <div class="cute-card rounded-3xl p-5 space-y-4">
-                <h2 class="text-sm font-bold text-pastel-text flex items-center gap-2">
-                    <span class="text-lg">🥗</span> สารอาหารหลักประจำวัน (Macronutrients)
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <!-- Protein -->
-                    <div class="space-y-1.5 bg-pastel-lightpink p-3.5 rounded-2xl border border-pastel-rose/50">
-                        <div class="flex justify-between text-xs">
-                            <span class="font-bold text-pastel-brand flex items-center gap-1">🍗 โปรตีน</span>
-                            <span id="macro-protein-text" class="text-slate-500 font-semibold">0 / 0g</span>
-                        </div>
-                        <div class="w-full bg-white rounded-full h-2.5 overflow-hidden p-0.5 border border-pink-100">
-                            <div id="macro-protein-bar" class="bg-gradient-to-r from-pink-300 to-pastel-brand h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <!-- Carbs -->
-                    <div class="space-y-1.5 bg-pastel-yellow/40 p-3.5 rounded-2xl border border-amber-100">
-                        <div class="flex justify-between text-xs">
-                            <span class="font-bold text-amber-700 flex items-center gap-1">🍚 คาร์โบไฮเดรต</span>
-                            <span id="macro-carbs-text" class="text-slate-500 font-semibold">0 / 0g</span>
-                        </div>
-                        <div class="w-full bg-white rounded-full h-2.5 overflow-hidden p-0.5 border border-amber-100">
-                            <div id="macro-carbs-bar" class="bg-gradient-to-r from-amber-300 to-amber-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <!-- Fat -->
-                    <div class="space-y-1.5 bg-pastel-purple/50 p-3.5 rounded-2xl border border-purple-100">
-                        <div class="flex justify-between text-xs">
-                            <span class="font-bold text-purple-700 flex items-center gap-1">🥑 ไขมันดี</span>
-                            <span id="macro-fat-text" class="text-slate-500 font-semibold">0 / 0g</span>
-                        </div>
-                        <div class="w-full bg-white rounded-full h-2.5 overflow-hidden p-0.5 border border-purple-100">
-                            <div id="macro-fat-bar" class="bg-gradient-to-r from-purple-300 to-purple-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Today's Meal List -->
-            <div class="cute-card rounded-3xl p-5 space-y-4">
-                <div class="flex items-center justify-between border-b border-pastel-peach pb-3">
-                    <h2 class="text-base font-bold text-pastel-text flex items-center gap-2">
-                        <span class="text-xl">📝</span> รายการอาหารที่บันทึกวันนี้
-                    </h2>
-                    <button onclick="switchTab('log')" class="cute-btn text-xs bg-pastel-pink hover:bg-pastel-brand text-white px-4 py-2 rounded-2xl font-bold transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-plus text-xs"></i> เพิ่มรายการ
+            <!-- AI Image Analysis Result Card (Pastel Mint & Pink) -->
+            <div id="image-analysis-container" class="hidden bg-white/95 backdrop-blur-md border-2 border-pink-200 rounded-3xl p-5 sm:p-6 shadow-cute-card space-y-4 transition-all">
+                <div class="flex items-center justify-between border-b border-pink-100 pb-3">
+                    <h3 class="font-bold text-pink-700 text-sm sm:text-base flex items-center gap-2">
+                        <span class="text-xl">🔍</span> ผลการวิเคราะห์รูปภาพอาหารด้วย AI
+                    </h3>
+                    <button onclick="closeImageAnalysis()" class="w-8 h-8 rounded-full bg-pink-50 text-pink-400 hover:text-pink-600 hover:bg-pink-100 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark text-base"></i>
                     </button>
                 </div>
-
-                <div id="dashboard-meals-container" class="space-y-3">
-                    <!-- Dynamic List Rendered by JS -->
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 2: FOOD LOG & AI SCANNER -->
-        <div id="view-log" class="tab-content hidden space-y-6">
-            
-            <!-- Quick AI Calculator Input Box -->
-            <div class="cute-card rounded-3xl p-5 space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-pastel-mint text-emerald-600 flex items-center justify-center font-bold text-lg">
-                        ✨
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-pastel-text">คำนวณแคลอรี่จากเมนูอาหารพิมพ์อิสระ</h2>
-                        <p class="text-xs text-slate-400">พิมพ์ชื่อเมนู เช่น "ข้าวผัดกระเพราหมูกรอบไข่ดาว" หรือ "ชาไทยหวาน 50%"</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" id="ai-meal-text-input" placeholder="พิมพ์ชื่อเมนูอาหาร/เครื่องดื่มที่นี่..." class="flex-1 px-4 py-3 border-2 border-pastel-rose/50 rounded-2xl text-sm focus:border-pastel-brand focus:outline-none bg-pastel-lightpink/30 font-medium">
-                    <button onclick="handleCalculateMealText()" class="cute-btn bg-pastel-brand hover:bg-pastel-brandDark text-white font-bold px-6 py-3 rounded-2xl text-sm transition flex items-center justify-center gap-2 shadow-sm shrink-0">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> คำนวณแคลอรี่
-                    </button>
-                </div>
-
-                <!-- Quick Preset Chips -->
-                <div class="flex flex-wrap items-center gap-2 pt-1">
-                    <span class="text-xs font-bold text-slate-400">ตัวอย่างฮิต 🍓:</span>
-                    <button onclick="fillQuickText('ข้าวไข่เจียวหมูสับ 1 จาน')" class="cute-btn text-xs bg-pastel-peach hover:bg-pastel-rose text-pastel-brand px-3 py-1.5 rounded-full transition font-semibold">🍳 ข้าวไข่เจียวหมูสับ</button>
-                    <button onclick="fillQuickText('ก๋วยเตี๋ยวเรือเส้นเล็กหมูน้ำตก')" class="cute-btn text-xs bg-pastel-peach hover:bg-pastel-rose text-pastel-brand px-3 py-1.5 rounded-full transition font-semibold">🍜 ก๋วยเตี๋ยวเรือ</button>
-                    <button onclick="fillQuickText('ชาไทยหวาน 50% 1 แก้ว')" class="cute-btn text-xs bg-pastel-peach hover:bg-pastel-rose text-pastel-brand px-3 py-1.5 rounded-full transition font-semibold">🧋 ชาไทยหวาน 50%</button>
-                    <button onclick="fillQuickText('ส้มตำไทยไข่เค็ม 1 จาน')" class="cute-btn text-xs bg-pastel-peach hover:bg-pastel-rose text-pastel-brand px-3 py-1.5 rounded-full transition font-semibold">🥗 ส้มตำไทย</button>
-                </div>
-            </div>
-
-            <!-- Photo AI Scanner Box -->
-            <div class="cute-card rounded-3xl p-5 space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-pastel-purple text-purple-600 flex items-center justify-center font-bold text-lg">
-                        📸
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-pastel-text">ถ่ายรูป / อัปโหลดภาพอาหารด้วย AI</h2>
-                        <p class="text-xs text-slate-400">ระบบ AI จะช่วยสแกนจานอาหารและประเมินพลังงานให้โดยอัตโนมัติ</p>
-                    </div>
-                </div>
-
-                <div class="border-2 border-dashed border-pastel-rose/80 rounded-3xl p-6 text-center hover:border-pastel-brand transition cursor-pointer bg-pastel-lightpink/40 relative" onclick="document.getElementById('photo-input').click()">
-                    <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(event)" class="hidden">
-                    <div id="photo-preview-container" class="space-y-2">
-                        <div class="w-14 h-14 rounded-full bg-white shadow-sm border border-pastel-rose mx-auto flex items-center justify-center text-pastel-brand text-2xl">
-                            🎀
+                
+                <div class="flex flex-col md:flex-row gap-5">
+                    <!-- Image Preview & Loading State -->
+                    <div class="w-full md:w-1/3 aspect-square bg-pink-50/60 rounded-2xl overflow-hidden relative border-2 border-dashed border-pink-200 flex items-center justify-center shadow-inner">
+                        <img id="food-image-preview" src="" class="w-full h-full object-cover hidden" alt="พรีวิวอาหาร">
+                        <div id="image-analyzing-spinner" class="flex flex-col items-center justify-center p-4 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-500 flex items-center justify-center text-2xl mb-2 animate-bounce">
+                                🥣
+                            </div>
+                            <i class="fa-solid fa-circle-notch fa-spin text-pink-400 text-2xl mb-2"></i>
+                            <p class="text-xs font-bold text-pink-700">กำลังสแกนจานอาหาร...</p>
+                            <p class="text-[11px] text-pink-400 mt-0.5">น้อง AI กำลังคำนวณสารอาหารให้อยู่น้า</p>
                         </div>
-                        <p class="text-xs font-bold text-pastel-brand">คลิกเพื่อเลือกภาพจานอาหารน่ารักๆ ของคุณ</p>
-                        <p class="text-[11px] text-slate-400">รองรับไฟล์ JPG, PNG</p>
                     </div>
-                    <img id="photo-preview-img" class="hidden max-h-56 mx-auto rounded-2xl shadow-md border-2 border-white object-cover">
+                    
+                    <!-- Result Form -->
+                    <div id="image-analysis-details" class="w-full md:w-2/3 space-y-3.5 hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                                    <span>🍽️</span> ชื่อเมนูที่ AI ตรวจพบ
+                                </label>
+                                <input type="text" id="img-ai-name" class="w-full mt-1.5 px-3.5 py-2.5 bg-pink-50/30 border border-pink-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-pink-300 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                                    <span>🕒</span> จัดลงในมื้ออาหาร
+                                </label>
+                                <select id="img-ai-meal-type" class="w-full mt-1.5 px-3.5 py-2.5 bg-pink-50/30 border border-pink-200 rounded-xl text-sm font-medium text-slate-800 focus:ring-2 focus:ring-pink-300 focus:outline-none">
+                                    <option value="breakfast">🍳 มื้อเช้า (Breakfast)</option>
+                                    <option value="lunch" selected>🥗 มื้อเที่ยง (Lunch)</option>
+                                    <option value="dinner">🍲 มื้อเย็น (Dinner)</option>
+                                    <option value="snack">🍰 ขนม & ว่าง (Snack)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Macro Nutrients inputs (Pastel Badges) -->
+                        <div class="grid grid-cols-4 gap-2 text-center bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 p-3 rounded-2xl border border-pink-100">
+                            <div class="bg-white/80 p-2 rounded-xl shadow-sm border border-pink-100">
+                                <span class="text-[11px] text-pink-500 font-bold block">🔥 พลังงาน</span>
+                                <input type="number" id="img-ai-cal" class="w-full text-center font-extrabold text-pink-600 text-sm bg-pink-50/40 border border-pink-200 rounded-lg mt-1 p-1">
+                                <span class="text-[10px] text-slate-400">kcal</span>
+                            </div>
+                            <div class="bg-white/80 p-2 rounded-xl shadow-sm border border-emerald-100">
+                                <span class="text-[11px] text-emerald-600 font-bold block">🥩 โปรตีน</span>
+                                <input type="number" id="img-ai-protein" class="w-full text-center font-extrabold text-emerald-600 text-sm bg-emerald-50/40 border border-emerald-200 rounded-lg mt-1 p-1">
+                                <span class="text-[10px] text-slate-400">กรัม</span>
+                            </div>
+                            <div class="bg-white/80 p-2 rounded-xl shadow-sm border border-amber-100">
+                                <span class="text-[11px] text-amber-600 font-bold block">🍞 คาร์บ</span>
+                                <input type="number" id="img-ai-carbs" class="w-full text-center font-extrabold text-amber-600 text-sm bg-amber-50/40 border border-amber-200 rounded-lg mt-1 p-1">
+                                <span class="text-[10px] text-slate-400">กรัม</span>
+                            </div>
+                            <div class="bg-white/80 p-2 rounded-xl shadow-sm border border-rose-100">
+                                <span class="text-[11px] text-rose-500 font-bold block">🥑 ไขมัน</span>
+                                <input type="number" id="img-ai-fat" class="w-full text-center font-extrabold text-rose-600 text-sm bg-rose-50/40 border border-rose-200 rounded-lg mt-1 p-1">
+                                <span class="text-[10px] text-slate-400">กรัม</span>
+                            </div>
+                        </div>
+
+                        <!-- AI Advice / Notes -->
+                        <div class="text-xs text-amber-900 bg-amber-50/90 p-3 rounded-2xl border border-amber-200/80 flex items-start gap-2.5">
+                            <span class="text-lg shrink-0">💡</span>
+                            <span id="img-ai-notes-text" class="font-medium pt-0.5">คำแนะนำโภชนาการน่ารักๆ จาก AI</span>
+                        </div>
+
+                        <div class="flex justify-end gap-2.5 pt-2">
+                            <button onclick="closeImageAnalysis()" class="px-4 py-2.5 border border-pink-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-pink-50 transition">ยกเลิก</button>
+                            <button onclick="saveImageAnalysisToLog()" class="px-5 py-2.5 bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 active:scale-95 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-cute-btn transition">
+                                <span>💖</span> บันทึกลงไดอารี่
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Search Database Meal Box -->
-            <div class="cute-card rounded-3xl p-5 space-y-4">
+            <!-- AI Text Input Prompt Bar (Pastel Pink Theme) -->
+            <div class="bg-white rounded-3xl p-5 border border-pink-100 shadow-cute-card space-y-3">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-base font-bold text-pastel-text flex items-center gap-2">
-                        <span class="text-lg">🔍</span> ค้นหาเมนูยอดนิยม
-                    </h2>
-                    <span class="text-xs text-pastel-brand bg-pastel-peach px-2.5 py-1 rounded-full font-bold">20+ เมนูฮิต</span>
+                    <label class="text-xs sm:text-sm font-bold text-pink-700 flex items-center gap-2">
+                        <span class="text-lg">✏️</span> พิมพ์เพิ่มเมนูด้วย AI (Text Prompt)
+                    </label>
+                    <span class="text-xs text-pink-400 bg-pink-50 px-2.5 py-0.5 rounded-full font-medium">เช่น "ส้มตำไทย 1 ครก ไก่ย่าง 1 ไม้ นมสด 1 แก้ว"</span>
                 </div>
-
-                <input type="text" id="food-search-input" oninput="filterPresetFoods(this.value)" placeholder="ค้นหา เช่น ข้าวมันไก่, กะเพรา, ส้มตำ..." class="w-full px-4 py-2.5 border-2 border-pastel-peach rounded-2xl text-sm focus:border-pastel-brand focus:outline-none bg-white font-medium">
-
-                <div id="preset-foods-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto custom-scrollbar pr-1">
-                    <!-- Dynamic Grid Items -->
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: GOALS & BODY MEASUREMENTS -->
-        <div id="view-goals" class="tab-content hidden space-y-6">
-            <!-- User Profile & Target Settings Box -->
-            <div class="cute-card rounded-3xl p-5 space-y-5">
-                <h2 class="text-lg font-bold text-pastel-text flex items-center gap-2">
-                    <span class="text-xl">⚙️</span> ตั้งค่าสัดส่วนร่างกาย & BMR / TDEE
-                </h2>
-
-                <form onsubmit="handleSaveProfile(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-500">เพศ 🚻</label>
-                        <select id="profile-gender" class="w-full mt-1.5 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm bg-white font-medium focus:border-pastel-brand">
-                            <option value="female">หญิง (Female)</option>
-                            <option value="male">ชาย (Male)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500">อายุ (ปี) 🎂</label>
-                        <input type="number" id="profile-age" value="28" required class="w-full mt-1.5 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm bg-white font-medium focus:border-pastel-brand">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500">ส่วนสูง (ซม.) 📏</label>
-                        <input type="number" id="profile-height" value="160" required class="w-full mt-1.5 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm bg-white font-medium focus:border-pastel-brand">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500">น้ำหนักปัจจุบัน (กก.) ⚖️</label>
-                        <input type="number" step="0.1" id="profile-weight" value="60" required class="w-full mt-1.5 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm bg-white font-medium focus:border-pastel-brand">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500">น้ำหนักเป้าหมาย (กก.) 🌟</label>
-                        <input type="number" step="0.1" id="profile-target-weight" value="52" required class="w-full mt-1.5 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm bg-white font-medium focus:border-pastel-brand">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500">กิจกรรมประจำวัน 🏃‍♀️</label>
-                        <select id="profile-activity" class="w-full mt-1.5 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm bg-white font-medium focus:border-pastel-brand">
-                            <option value="1.2">นั่งทำงานเป็นหลัก</option>
-                            <option value="1.375" selected>ออกกำลังกายเบาๆ 1-3 วัน/สัปดาห์</option>
-                            <option value="1.55">ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์</option>
-                            <option value="1.725">ออกกำลังกายหนัก 6-7 วัน/สัปดาห์</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500">อัตราลดน้ำหนัก/สัปดาห์ ⏱️</label>
-                        <select id="profile-pace" class="w-full mt-1.5 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm bg-white font-medium focus:border-pastel-brand">
-                            <option value="0.25">ค่อยเป็นค่อยไป (0.25 kg/wk)</option>
-                            <option value="0.5" selected>มาตรฐานสุขภาพดี (0.5 kg/wk)</option>
-                            <option value="0.75">เข้มข้น (0.75 kg/wk)</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="cute-btn w-full bg-pastel-brand hover:bg-pastel-brandDark text-white font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-sm">
-                            คำนวณ & บันทึก ✨
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Calculation Summary Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                    <div class="p-3.5 bg-pastel-lightpink rounded-2xl border border-pastel-rose/50 text-center">
-                        <span class="text-xs font-bold text-pastel-brand">BMR (พลังงานขั้นต่ำ)</span>
-                        <p id="calc-bmr-display" class="text-xl font-black text-pastel-text mt-0.5">-- kcal</p>
-                    </div>
-                    <div class="p-3.5 bg-pastel-purple/40 rounded-2xl border border-purple-100 text-center">
-                        <span class="text-xs font-bold text-purple-700">TDEE (พลังงานใช้จริง)</span>
-                        <p id="calc-tdee-display" class="text-xl font-black text-pastel-text mt-0.5">-- kcal</p>
-                    </div>
-                    <div class="p-3.5 bg-pastel-mint/50 rounded-2xl border border-emerald-200 text-center">
-                        <span class="text-xs font-bold text-emerald-700">เป้าหมายรับประทาน/วัน</span>
-                        <p id="calc-target-cal-display" class="text-xl font-black text-emerald-600 mt-0.5">-- kcal</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Weight Goal & Chart Box -->
-            <div class="cute-card rounded-3xl p-5 space-y-4">
-                <h2 class="text-lg font-bold text-pastel-text flex items-center gap-2">
-                    <span class="text-xl">📈</span> กราฟบันทึกน้ำหนักตัว
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-                    <div class="p-4 rounded-2xl bg-pastel-lightpink border border-pastel-rose/50 text-center">
-                        <span class="text-xs text-slate-400 font-bold uppercase">น้ำหนักปัจจุบัน</span>
-                        <p id="goal-current-weight-display" class="text-2xl font-black text-pastel-brand mt-1">-- kg</p>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-pastel-purple/40 border border-purple-100 text-center">
-                        <span class="text-xs text-purple-600 font-bold uppercase">น้ำหนักเป้าหมาย</span>
-                        <p id="goal-target-weight-display" class="text-2xl font-black text-purple-700 mt-1">-- kg</p>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-pastel-mint/50 border border-emerald-200 text-center">
-                        <span class="text-xs text-emerald-600 font-bold uppercase">น้ำหนักที่ต้องลด</span>
-                        <p id="goal-diff-weight-display" class="text-2xl font-black text-emerald-600 mt-1">-- kg</p>
-                    </div>
-                </div>
-
-                <!-- Log Weight Input -->
-                <form onsubmit="handleLogWeight(event)" class="flex flex-col sm:flex-row items-center gap-3 bg-pastel-peach/30 p-4 rounded-2xl border border-pastel-peach">
-                    <label class="text-sm font-bold text-pastel-brand shrink-0">บันทึกน้ำหนักวันนี้ (kg):</label>
-                    <input type="number" step="0.1" id="input-log-weight" required placeholder="เช่น 59.5" class="w-full sm:w-36 px-3 py-2 border-2 border-pastel-rose/60 rounded-xl text-sm font-semibold focus:border-pastel-brand focus:outline-none bg-white">
-                    <button type="submit" class="cute-btn w-full sm:w-auto bg-pastel-pink hover:bg-pastel-brand text-white px-5 py-2 rounded-xl text-sm font-bold transition shrink-0">
-                        บันทึกน้ำหนัก 🎀
+                <div class="flex gap-2.5">
+                    <input type="text" id="text-ai-input" placeholder="พิมพ์ชื่ออาหาร ปริมาณ หรือสิ่งที่ทานวันนี้..." onkeypress="handleTextAiKeyPress(event)" class="flex-1 px-4 py-3 rounded-2xl border border-pink-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-pink-50/20 placeholder:text-slate-400">
+                    <button onclick="analyzeFoodTextWithGemini()" id="btn-text-ai" class="bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shrink-0 shadow-cute-btn active:scale-95">
+                        <span>✨</span>
+                        <span>คำนวณทันที</span>
                     </button>
-                </form>
-
-                <!-- Chart -->
-                <div class="h-64 relative w-full pt-2">
-                    <canvas id="weightChart"></canvas>
                 </div>
             </div>
 
-            <!-- Body Measurements Tracking Box -->
-            <div class="cute-card rounded-3xl p-5 space-y-5">
-                <div class="border-b border-pastel-peach pb-3">
-                    <h2 class="text-lg font-bold text-pastel-text flex items-center gap-2">
-                        <span class="text-xl">🎀</span> บันทึกสัดส่วนร่างกาย (Body Measurements)
+            <!-- Daily Summary Cards & Pastel Progress Bars -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Calorie Target Overview (Pastel Rose / Cream) -->
+                <div class="bg-white rounded-3xl p-5 border border-pink-100 shadow-cute-card flex flex-col justify-between space-y-3 md:col-span-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-pink-600 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>🔥</span> พลังงานวันนี้
+                        </span>
+                        <span id="date-display" class="text-xs text-pink-400 font-medium bg-pink-50 px-2.5 py-0.5 rounded-full">วันนี้</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <div>
+                            <span id="stat-consumed-cal" class="text-3xl sm:text-4xl font-black text-pink-600">0</span>
+                            <span class="text-xs font-bold text-slate-400"> / <span id="stat-target-cal">2,000</span> kcal</span>
+                        </div>
+                        <span id="stat-remaining-badge" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-pink-50 text-pink-600 border border-pink-200 shadow-sm flex items-center gap-1">
+                            <span>🎯</span> เหลือ <span id="stat-remaining-cal">2,000</span> kcal
+                        </span>
+                    </div>
+                    <!-- Calorie Progress Bar -->
+                    <div class="w-full bg-pink-100/70 rounded-full h-3.5 p-0.5 overflow-hidden">
+                        <div id="progress-cal" class="bg-gradient-to-r from-pink-400 to-rose-400 h-2.5 rounded-full transition-all duration-500 shadow-sm" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Macro Breakdown (Pastel Green, Orange, Pink Cards) -->
+                <div class="bg-white rounded-3xl p-5 border border-pink-100 shadow-cute-card md:col-span-2 flex flex-col justify-between space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>🥗</span> สัดส่วนสารอาหารหลัก (Macros)
+                        </span>
+                        <span class="text-xs text-pink-400 font-medium">เป้าหมายสารอาหารประจำวัน</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <!-- Protein (Pastel Mint) -->
+                        <div class="bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-100">
+                            <div class="flex justify-between items-center text-xs font-bold text-emerald-800 mb-1.5">
+                                <span class="flex items-center gap-1"><span>🥩</span> โปรตีน</span>
+                                <span class="text-emerald-600 font-extrabold"><span id="stat-protein">0</span>g</span>
+                            </div>
+                            <div class="w-full bg-emerald-200/60 rounded-full h-2 overflow-hidden">
+                                <div id="progress-protein" class="bg-emerald-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Carbs (Pastel Peach) -->
+                        <div class="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-100">
+                            <div class="flex justify-between items-center text-xs font-bold text-amber-800 mb-1.5">
+                                <span class="flex items-center gap-1"><span>🍞</span> คาร์บ</span>
+                                <span class="text-amber-600 font-extrabold"><span id="stat-carbs">0</span>g</span>
+                            </div>
+                            <div class="w-full bg-amber-200/60 rounded-full h-2 overflow-hidden">
+                                <div id="progress-carbs" class="bg-amber-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Fat (Pastel Rose) -->
+                        <div class="bg-rose-50/70 p-3.5 rounded-2xl border border-rose-100">
+                            <div class="flex justify-between items-center text-xs font-bold text-rose-800 mb-1.5">
+                                <span class="flex items-center gap-1"><span>🥑</span> ไขมัน</span>
+                                <span class="text-rose-600 font-extrabold"><span id="stat-fat">0</span>g</span>
+                            </div>
+                            <div class="w-full bg-rose-200/60 rounded-full h-2 overflow-hidden">
+                                <div id="progress-fat" class="bg-rose-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meal Logs Sections with Cute Cartoon Header Badges -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <span>🍱</span>
+                        <span>รายการมื้ออาหารวันนี้</span>
+                    </h3>
+                    <button onclick="clearAllDiary()" class="text-xs font-bold text-rose-400 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 border border-rose-100">
+                        <span>🗑️</span> ล้างข้อมูลวันนี้
+                    </button>
+                </div>
+
+                <!-- Breakfast (Sunny Morning Pastel) -->
+                <div class="bg-white rounded-3xl border border-amber-100 overflow-hidden shadow-cute-card transition hover:border-amber-200">
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50/50 px-5 py-3.5 border-b border-amber-100/80 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5 font-bold text-amber-900 text-sm">
+                            <span class="text-xl">🍳</span>
+                            <span>มื้อเช้า (Breakfast)</span>
+                        </div>
+                        <span id="subtotal-breakfast" class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1 rounded-full">0 kcal</span>
+                    </div>
+                    <div id="meal-list-breakfast" class="p-3.5 divide-y divide-pink-50 min-h-[50px]">
+                        <!-- Items rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Lunch (Fresh Minty Pastel) -->
+                <div class="bg-white rounded-3xl border border-emerald-100 overflow-hidden shadow-cute-card transition hover:border-emerald-200">
+                    <div class="bg-gradient-to-r from-emerald-50 to-teal-50/50 px-5 py-3.5 border-b border-emerald-100/80 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5 font-bold text-emerald-900 text-sm">
+                            <span class="text-xl">🥗</span>
+                            <span>มื้อเที่ยง (Lunch)</span>
+                        </div>
+                        <span id="subtotal-lunch" class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">0 kcal</span>
+                    </div>
+                    <div id="meal-list-lunch" class="p-3.5 divide-y divide-pink-50 min-h-[50px]">
+                        <!-- Items rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Dinner (Cozy Lavender Pastel) -->
+                <div class="bg-white rounded-3xl border border-purple-100 overflow-hidden shadow-cute-card transition hover:border-purple-200">
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50/50 px-5 py-3.5 border-b border-purple-100/80 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5 font-bold text-purple-900 text-sm">
+                            <span class="text-xl">🍲</span>
+                            <span>มื้อเย็น (Dinner)</span>
+                        </div>
+                        <span id="subtotal-dinner" class="text-xs font-bold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">0 kcal</span>
+                    </div>
+                    <div id="meal-list-dinner" class="p-3.5 divide-y divide-pink-50 min-h-[50px]">
+                        <!-- Items rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Snack (Sweet Strawberry Pastel) -->
+                <div class="bg-white rounded-3xl border border-pink-100 overflow-hidden shadow-cute-card transition hover:border-pink-200">
+                    <div class="bg-gradient-to-r from-pink-50 to-rose-50/50 px-5 py-3.5 border-b border-pink-100/80 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5 font-bold text-pink-900 text-sm">
+                            <span class="text-xl">🍰</span>
+                            <span>ของว่าง & ขนมหวาน (Snack)</span>
+                        </div>
+                        <span id="subtotal-snack" class="text-xs font-bold bg-pink-100 text-pink-800 px-3 py-1 rounded-full">0 kcal</span>
+                    </div>
+                    <div id="meal-list-snack" class="p-3.5 divide-y divide-pink-50 min-h-[50px]">
+                        <!-- Items rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==================== TAB 2: ANALYTICS & TARGETS ==================== -->
+        <div id="tab-analytics" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-7 border border-pink-100 shadow-cute-card space-y-6">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span class="text-2xl">📊</span> การวิเคราะห์สรุปสารอาหารประจำวัน
                     </h2>
-                    <p class="text-xs text-slate-400">ติดตามรอบเอว อก สะโพก ต้นแขน ต้นขา (หน่วย: ซม.)</p>
+                    <p class="text-xs text-pink-500 mt-1 font-medium">เปรียบเทียบโภชนาการของคุณกับเป้าหมายพลังงาน BMR และ TDEE</p>
                 </div>
 
-                <!-- Latest Measurements Summary Cards -->
-                <div id="latest-measurements-cards" class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <!-- Rendered by JS -->
+                <!-- Analytics Pastel Cards Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="p-4 rounded-2xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 text-center shadow-sm">
+                        <span class="text-xl block mb-1">💤</span>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">BMR พื้นฐาน</span>
+                        <span id="analytics-bmr" class="text-lg sm:text-xl font-black text-pink-600">1,600</span>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">kcal / วัน</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 text-center shadow-sm">
+                        <span class="text-xl block mb-1">🏃‍♀️</span>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">TDEE เผาผลาญรวม</span>
+                        <span id="analytics-tdee" class="text-lg sm:text-xl font-black text-purple-600">2,200</span>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">kcal / วัน</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-100 text-center shadow-sm">
+                        <span class="text-xl block mb-1">🎯</span>
+                        <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wider block">เป้าหมายประจำวัน</span>
+                        <span id="analytics-target-cal" class="text-lg sm:text-xl font-black text-amber-600">2,000</span>
+                        <span class="text-[10px] text-amber-500 block mt-0.5">kcal / วัน</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 text-center shadow-sm">
+                        <span class="text-xl block mb-1">🥣</span>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">ได้รับแล้ววันนี้</span>
+                        <span id="analytics-current-cal" class="text-lg sm:text-xl font-black text-emerald-600">0</span>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">kcal</span>
+                    </div>
                 </div>
 
-                <!-- Input Form -->
-                <form onsubmit="handleLogMeasurements(event)" class="bg-pastel-lightpink/50 p-4 rounded-2xl border border-pastel-rose/50 space-y-3">
-                    <h4 class="text-xs font-bold text-pastel-brand uppercase flex items-center gap-1">✨ บันทึกสัดส่วนใหม่</h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                        <div>
-                            <label class="text-xs text-slate-500 font-bold">รอบเอว (ซม.)</label>
-                            <input type="number" step="0.1" id="input-m-waist" placeholder="70" class="w-full mt-1 px-3 py-2 border border-pastel-rose rounded-xl text-sm font-semibold focus:outline-none bg-white">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 font-bold">รอบอก (ซม.)</label>
-                            <input type="number" step="0.1" id="input-m-chest" placeholder="85" class="w-full mt-1 px-3 py-2 border border-pastel-rose rounded-xl text-sm font-semibold focus:outline-none bg-white">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 font-bold">สะโพก (ซม.)</label>
-                            <input type="number" step="0.1" id="input-m-hips" placeholder="90" class="w-full mt-1 px-3 py-2 border border-pastel-rose rounded-xl text-sm font-semibold focus:outline-none bg-white">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 font-bold">ต้นแขน (ซม.)</label>
-                            <input type="number" step="0.1" id="input-m-arm" placeholder="26" class="w-full mt-1 px-3 py-2 border border-pastel-rose rounded-xl text-sm font-semibold focus:outline-none bg-white">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 font-bold">ต้นขา (ซม.)</label>
-                            <input type="number" step="0.1" id="input-m-thigh" placeholder="50" class="w-full mt-1 px-3 py-2 border border-pastel-rose rounded-xl text-sm font-semibold focus:outline-none bg-white">
-                        </div>
+                <!-- AI / Smart Advice Pastel Box -->
+                <div class="p-5 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 border border-pink-200 text-xs sm:text-sm space-y-2">
+                    <div class="font-bold text-pink-800 flex items-center gap-2">
+                        <span class="text-xl">🌸</span>
+                        <span>วิเคราะห์ความสมดุลโภชนาการจากน้อง AI</span>
                     </div>
-                    <div class="flex justify-end pt-1">
-                        <button type="submit" class="cute-btn bg-pastel-brand hover:bg-pastel-brandDark text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-floppy-disk"></i> บันทึกสัดส่วน
-                        </button>
-                    </div>
-                </form>
-
-                <!-- History Table -->
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">ประวัติสัดส่วนที่บันทึกไว้</h4>
-                    <div class="overflow-x-auto rounded-2xl border border-pastel-peach">
-                        <table class="w-full text-left text-xs text-slate-600">
-                            <thead class="bg-pastel-peach/50 text-pastel-brand font-bold">
-                                <tr>
-                                    <th class="p-3">วันที่</th>
-                                    <th class="p-3 text-center">เอว (ซม.)</th>
-                                    <th class="p-3 text-center">อก (ซม.)</th>
-                                    <th class="p-3 text-center">สะโพก (ซม.)</th>
-                                    <th class="p-3 text-center">ต้นแขน (ซม.)</th>
-                                    <th class="p-3 text-center">ต้นขา (ซม.)</th>
-                                    <th class="p-3 text-center">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="measurements-history-table-body" class="divide-y divide-pastel-peach/30 bg-white">
-                                <!-- Dynamic rows -->
-                            </tbody>
-                        </table>
-                    </div>
+                    <p id="analytics-advice" class="text-slate-700 leading-relaxed font-medium">ยังไม่มีข้อมูลบันทึกมื้ออาหารวันนี้ ลองกดสแกนรูปอาหารมื้อแรกดูนะจ๊ะ ✨</p>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 4: WEIGHT LOSS GUIDE -->
-        <div id="view-guide" class="tab-content hidden space-y-6">
-            <div class="bg-gradient-to-r from-pastel-pink via-pastel-rose to-pastel-purple rounded-3xl p-6 text-white shadow-md">
-                <h2 class="text-xl font-black mb-2 flex items-center gap-2">🌸 เคล็ดลับลดน้ำหนักอย่างมีความสุข & ยั่งยืน</h2>
-                <p class="text-xs opacity-95 leading-relaxed font-medium">
-                    การลดน้ำหนักแบบสุขภาพดี ไม่จำเป็นต้องอดอาหารอย่างทรมาน แค่เข้าใจหลัก Caloric Deficit และเลือกทานสารอาหารครบถ้วน ก็หุ่นสวยและมีความสุขกับการกินได้ทุกวันค่ะ ✨
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div class="cute-card p-5 rounded-3xl space-y-2">
-                    <div class="w-10 h-10 rounded-2xl bg-pastel-lightpink text-pastel-brand flex items-center justify-center font-black text-lg">
-                        1
-                    </div>
-                    <h3 class="font-bold text-pastel-brand text-base">Caloric Deficit ✨</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
-                        ทานให้น้อยกว่าพลังงานที่ใช้ (TDEE) ประมาณ 300 - 500 kcal ต่อวัน น้ำหนักจะค่อยๆ ลดลงอย่างปลอดภัย 0.5 kg/สัปดาห์
-                    </p>
-                </div>
-
-                <div class="cute-card p-5 rounded-3xl space-y-2">
-                    <div class="w-10 h-10 rounded-2xl bg-pastel-yellow text-amber-700 flex items-center justify-center font-black text-lg">
-                        2
-                    </div>
-                    <h3 class="font-bold text-amber-700 text-base">โปรตีนถึง อิ่มนาน 🍗</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
-                        เน้นโปรตีน 1.5 - 2.0 กรัม ต่อน้ำหนักตัว 1 kg ช่วยรักษาแรงกระชับของกล้ามเนื้อ และลดความหิวจุกจิกได้ดีมากๆ
-                    </p>
-                </div>
-
-                <div class="cute-card p-5 rounded-3xl space-y-2">
-                    <div class="w-10 h-10 rounded-2xl bg-pastel-sky text-sky-700 flex items-center justify-center font-black text-lg">
-                        3
-                    </div>
-                    <h3 class="font-bold text-sky-700 text-base">ดื่มน้ำวันละ 2 ลิตร 💧</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
-                        น้ำเปล่าช่วยกระตุ้นการเผาผลาญ ช่วยให้ผิวพรรณสดใสเปล่งปลั่งขณะลดน้ำหนักด้วยนะคะ
-                    </p>
-                </div>
-            </div>
-
-            <!-- Healthy Thai Food Tips Box -->
-            <div class="cute-card rounded-3xl p-5 space-y-3">
-                <h3 class="text-base font-bold text-pastel-brand flex items-center gap-2">
-                    <span class="text-lg">🍃</span> เทคนิคกินอาหารไทยให้อร่อยและหุ่นดี
-                </h3>
-                <ul class="text-xs text-slate-600 space-y-2 list-disc list-inside leading-relaxed font-medium">
-                    <li><strong class="text-pastel-text">เลี่ยงเมนูทอดเยิ้มๆ:</strong> สลับผัดกระเพราไข่ดาว เป็น กระเพราอกไก่น้ำผัด + ไข่ต้มแทน</li>
-                    <li><strong class="text-pastel-text">เลือกแกงน้ำใส:</strong> สลับต้มยำน้ำข้นเป็น ต้มยำน้ำใส, แกงส้ม หรือแกงเลียง</li>
-                    <li><strong class="text-pastel-text">เครื่องดื่มสั่งหวานน้อย 0-25%:</strong> ตัดแคลอรี่แฝงจากน้ำตาลได้วันละ 150-300 kcal ได้ง่ายๆ เลยค่ะ</li>
-                </ul>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modal Confirm Log Meal -->
-    <div id="meal-modal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="cute-card rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border-2 border-pastel-rose">
-            <h3 class="text-lg font-bold text-pastel-brand border-b border-pastel-peach pb-2 flex items-center gap-2">
-                <span>🎀</span> ยืนยันการบันทึกอาหาร
-            </h3>
-            <div class="space-y-3">
-                <div>
-                    <label class="text-xs font-bold text-slate-400">ชื่อเมนู</label>
-                    <input type="text" id="modal-meal-name" class="w-full mt-1 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm font-bold text-pastel-text focus:border-pastel-brand focus:outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
+        <!-- ==================== TAB 4: BODY METRICS & TARGET REDUCTION PLAN ==================== -->
+        <div id="tab-metrics" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-5 sm:p-7 border border-pink-100 shadow-cute-card space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-pink-100 pb-4">
                     <div>
-                        <label class="text-xs font-bold text-slate-400">มื้ออาหาร</label>
-                        <select id="modal-meal-type" class="w-full mt-1 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm font-medium bg-white focus:border-pastel-brand focus:outline-none">
-                            <option value="breakfast">มื้อเช้า 🌅</option>
-                            <option value="lunch" selected>มื้อเที่ยง ☀️</option>
-                            <option value="dinner">มื้อเย็น 🌙</option>
-                            <option value="snack">ของว่าง 🍰</option>
-                        </select>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <span class="text-2xl">🎀</span> บันทึกสัดส่วนร่างกาย & วางแผนลดเฉพาะจุด
+                        </h2>
+                        <p class="text-xs text-pink-400 mt-1 font-medium">ติดตามการกระชับสัดส่วน ตั้งเป้าหมาย พร้อมทริคลดเฉพาะจุดสุดคิ้วท์</p>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400">แคลอรี่ (kcal)</label>
-                        <input type="number" id="modal-meal-cal" class="w-full mt-1 px-3 py-2 border-2 border-pastel-peach rounded-xl text-sm font-black text-pastel-brand focus:border-pastel-brand focus:outline-none">
-                    </div>
+                    <button onclick="getAiBodyReductionPlan()" id="btn-ai-body-plan" class="bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-2xl transition shadow-cute-btn flex items-center justify-center gap-2 self-start sm:self-auto active:scale-95">
+                        <span>✨</span>
+                        <span>วิเคราะห์วิธีลดเฉพาะจุดด้วย AI</span>
+                    </button>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="text-xs font-bold text-slate-400">โปรตีน (g)</label>
-                        <input type="number" id="modal-meal-protein" class="w-full mt-1 px-2.5 py-1.5 border border-pastel-peach rounded-xl text-xs font-semibold focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400">คาร์บ (g)</label>
-                        <input type="number" id="modal-meal-carbs" class="w-full mt-1 px-2.5 py-1.5 border border-pastel-peach rounded-xl text-xs font-semibold focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400">ไขมัน (g)</label>
-                        <input type="number" id="modal-meal-fat" class="w-full mt-1 px-2.5 py-1.5 border border-pastel-peach rounded-xl text-xs font-semibold focus:outline-none">
-                    </div>
-                </div>
-            </div>
-            <div class="flex gap-2 pt-2">
-                <button onclick="closeMealModal()" class="cute-btn flex-1 bg-pastel-peach hover:bg-pastel-rose text-pastel-brand py-2.5 rounded-2xl text-xs font-bold transition">
-                    ยกเลิก
-                </button>
-                <button onclick="saveModalMeal()" class="cute-btn flex-1 bg-pastel-brand hover:bg-pastel-brandDark text-white py-2.5 rounded-2xl text-xs font-bold transition shadow-sm">
-                    บันทึกลงไดอารี่ ✨
-                </button>
-            </div>
-        </div>
-    </div>
 
-    <script>
-        // Preset Thai Food Database
-        const PRESET_THAI_FOODS = [
-            { name: "ข้าวผัดกระเพราไก่ไข่ดาว", calories: 580, protein: 26, carbs: 65, fat: 22 },
-            { name: "ข้าวมันไก่ (เนื้ออกไม่หนัง)", calories: 520, protein: 28, carbs: 68, fat: 14 },
-            { name: "ข้าวหมูแดง", calories: 540, protein: 22, carbs: 75, fat: 16 },
-            { name: "ผัดไทยกุ้งสด", calories: 590, protein: 20, carbs: 72, fat: 24 },
-            { name: "ก๋วยเตี๋ยวเรือหมูน้ำตก", calories: 410, protein: 18, carbs: 48, fat: 15 },
-            { name: "ส้มตำไทย", calories: 120, protein: 3, carbs: 25, fat: 1 },
-            { name: "ไก่ย่าง (อกไก่ 1 ชิ้น)", calories: 180, protein: 32, carbs: 2, fat: 5 },
-            { name: "ลาบหมู", calories: 210, protein: 19, carbs: 8, fat: 12 },
-            { name: "ต้มยำกุ้งน้ำใส", calories: 140, protein: 16, carbs: 8, fat: 4 },
-            { name: "แกงเขียวหวานไก่", calories: 380, protein: 18, carbs: 12, fat: 28 },
-            { name: "ข้าวไข่เจียวหมูสับ", calories: 620, protein: 18, carbs: 60, fat: 34 },
-            { name: "ชาไทยใส่นม (หวานปกติ)", calories: 290, protein: 4, carbs: 46, fat: 10 },
-            { name: "อเมริกาโน่เย็นไม่หวาน", calories: 15, protein: 0, carbs: 3, fat: 0 },
-            { name: "สุกี้น้ำหมู", calories: 320, protein: 24, carbs: 30, fat: 10 },
-            { name: "ข้าวต้มกุ้ง", calories: 250, protein: 16, carbs: 38, fat: 4 }
-        ];
+                <!-- Body Measurements Inputs Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Form Controls with Cute Cartoon Part Icons -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold text-pink-600 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>📏</span> กรอกสัดส่วนปัจจุบัน & เป้าหมาย (เซนติเมตร / cm)
+                        </h3>
 
-        // Global State Management
-        let appState = {
-            userProfile: {
-                gender: 'female',
-                age: 28,
-                height: 160,
-                weight: 60,
-                targetWeight: 52,
-                activity: 1.375,
-                pace: 0.5
-            },
-            currentDateStr: new Date().toISOString().split('T')[0],
-            logs: {},
-            waterLogs: {},
-            weightHistory: [
-                { date: '2026-08-10', weight: 62.0 },
-                { date: '2026-08-17', weight: 61.2 },
-                { date: '2026-08-24', weight: 60.0 }
-            ],
-            bodyMeasurementsHistory: [
-                { date: '2026-08-10', waist: 78, chest: 88, hips: 96, arm: 28, thigh: 54 },
-                { date: '2026-08-24', waist: 75, chest: 87, hips: 94, arm: 27.5, thigh: 52.5 }
-            ]
-        };
-
-        let weightChartInstance = null;
-
-        function updateCalculations() {
-            const p = appState.userProfile || {};
-            const gender = p.gender || 'female';
-            const age = parseFloat(p.age) || 28;
-            const height = parseFloat(p.height) || 160;
-            const weight = parseFloat(p.weight) || 60;
-            const targetWeight = parseFloat(p.targetWeight) || 52;
-            const activity = parseFloat(p.activity) || 1.375;
-            const pace = parseFloat(p.pace) || 0.5;
-
-            // BMR calculation
-            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
-            bmr = gender === 'male' ? bmr + 5 : bmr - 161;
-            bmr = Math.round(bmr);
-
-            // TDEE calculation
-            const tdee = Math.round(bmr * activity);
-
-            // Daily deficit
-            const dailyDeficit = Math.round(pace * 1100);
-            let targetCalories = Math.round(tdee - dailyDeficit);
-
-            // Minimum safe caloric floor
-            const minSafeCalories = gender === 'male' ? 1500 : 1200;
-            if (targetCalories < minSafeCalories) {
-                targetCalories = minSafeCalories;
-            }
-
-            // Macros (Protein: 30%, Carbs: 45%, Fat: 25%)
-            const targetProtein = Math.round((targetCalories * 0.30) / 4);
-            const targetCarbs = Math.round((targetCalories * 0.45) / 4);
-            const targetFat = Math.round((targetCalories * 0.25) / 9);
-
-            appState.calculated = {
-                bmr,
-                tdee,
-                targetCalories,
-                targetProtein,
-                targetCarbs,
-                targetFat
-            };
-
-            // Update DOM displays in Goals
-            const currWDisplay = document.getElementById('goal-current-weight-display');
-            const targetWDisplay = document.getElementById('goal-target-weight-display');
-            const diffWDisplay = document.getElementById('goal-diff-weight-display');
-
-            if (currWDisplay) currWDisplay.textContent = `${weight} kg`;
-            if (targetWDisplay) targetWDisplay.textContent = `${targetWeight} kg`;
-            if (diffWDisplay) {
-                const diff = (weight - targetWeight).toFixed(1);
-                diffWDisplay.textContent = diff > 0 ? `${diff} kg` : 'บรรลุเป้าหมายแล้ว 🎉';
-            }
-
-            const bmrEl = document.getElementById('calc-bmr-display');
-            if (bmrEl) bmrEl.textContent = `${bmr} kcal`;
-
-            const tdeeEl = document.getElementById('calc-tdee-display');
-            if (tdeeEl) tdeeEl.textContent = `${tdee} kcal`;
-
-            const targetCalEl = document.getElementById('calc-target-cal-display');
-            if (targetCalEl) targetCalEl.textContent = `${targetCalories} kcal`;
-        }
-
-        function renderDashboard() {
-            const todayStr = appState.currentDateStr;
-            const dayLogs = appState.logs[todayStr] || [];
-            const targetCal = appState.calculated ? appState.calculated.targetCalories : 1600;
-
-            let totalCal = 0;
-            let totalProtein = 0;
-            let totalCarbs = 0;
-            let totalFat = 0;
-
-            dayLogs.forEach(item => {
-                totalCal += parseFloat(item.calories) || 0;
-                totalProtein += parseFloat(item.protein) || 0;
-                totalCarbs += parseFloat(item.carbs) || 0;
-                totalFat += parseFloat(item.fat) || 0;
-            });
-
-            const remainingCal = targetCal - totalCal;
-            const eatenPercent = Math.min(Math.round((totalCal / targetCal) * 100), 100);
-
-            // DOM Update Summary Cards
-            document.getElementById('dash-target-cal').textContent = `${targetCal} kcal`;
-            document.getElementById('dash-eaten-cal').textContent = `${totalCal} kcal`;
-            document.getElementById('dash-eaten-percent').textContent = `${eatenPercent}% ของเป้าหมายประจำวัน`;
-            document.getElementById('dash-remaining-cal').textContent = `${remainingCal} kcal`;
-            
-            const remStatus = document.getElementById('dash-remaining-status');
-            if (remainingCal < 0) {
-                remStatus.textContent = `ทานเกินเป้าหมายไป ${Math.abs(remainingCal)} kcal`;
-                remStatus.className = "text-[11px] font-bold text-rose-500 mt-1";
-            } else {
-                remStatus.textContent = `แคลอรี่ที่ทานได้เพิ่ม`;
-                remStatus.className = "text-[11px] font-semibold text-slate-400 mt-1";
-            }
-
-            // Macros Update
-            const targetP = appState.calculated ? appState.calculated.targetProtein : 100;
-            const targetC = appState.calculated ? appState.calculated.targetCarbs : 180;
-            const targetF = appState.calculated ? appState.calculated.targetFat : 45;
-
-            document.getElementById('macro-protein-text').textContent = `${Math.round(totalProtein)} / ${targetP}g`;
-            document.getElementById('macro-protein-bar').style.width = `${Math.min(Math.round((totalProtein / targetP) * 100), 100)}%`;
-
-            document.getElementById('macro-carbs-text').textContent = `${Math.round(totalCarbs)} / ${targetC}g`;
-            document.getElementById('macro-carbs-bar').style.width = `${Math.min(Math.round((totalCarbs / targetC) * 100), 100)}%`;
-
-            document.getElementById('macro-fat-text').textContent = `${Math.round(totalFat)} / ${targetF}g`;
-            document.getElementById('macro-fat-bar').style.width = `${Math.min(Math.round((totalFat / targetF) * 100), 100)}%`;
-
-            // Water Log
-            const currentWater = appState.waterLogs[todayStr] || 0;
-            document.getElementById('water-count').textContent = `${currentWater} / 2,000 ml`;
-            document.getElementById('water-bar').style.width = `${Math.min(Math.round((currentWater / 2000) * 100), 100)}%`;
-
-            // Render Meals List
-            const container = document.getElementById('dashboard-meals-container');
-            if (dayLogs.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-slate-400 space-y-2">
-                        <div class="text-4xl">🍰</div>
-                        <p class="text-xs font-semibold">ยังไม่มีบันทึกอาหารวันนี้ คลิกปุ่มเพิ่มรายการด้านบนได้เลยน้า</p>
-                    </div>
-                `;
-            } else {
-                const mealTypeLabels = {
-                    breakfast: { label: 'มื้อเช้า 🌅', color: 'bg-pastel-yellow text-amber-800' },
-                    lunch: { label: 'มื้อเที่ยง ☀️', color: 'bg-pastel-peach text-pastel-brand' },
-                    dinner: { label: 'มื้อเย็น 🌙', color: 'bg-pastel-purple text-purple-800' },
-                    snack: { label: 'ของว่าง 🧁', color: 'bg-pastel-mint text-emerald-800' }
-                };
-
-                container.innerHTML = dayLogs.map((item, idx) => {
-                    const badge = mealTypeLabels[item.mealType] || { label: 'ทั่วไป', color: 'bg-slate-100 text-slate-700' };
-                    return `
-                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/80 hover:bg-pastel-lightpink/60 transition border border-pastel-peach/60 shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <span class="px-3 py-1 rounded-xl text-xs font-bold ${badge.color}">${badge.label}</span>
-                                <div>
-                                    <h4 class="text-sm font-bold text-pastel-text">${item.name}</h4>
-                                    <p class="text-[11px] font-semibold text-slate-400">P: ${item.protein}g | C: ${item.carbs}g | F: ${item.fat}g</p>
+                        <div class="space-y-3 bg-pink-50/40 p-4 sm:p-5 rounded-2xl border border-pink-100">
+                            <!-- Chest -->
+                            <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+                                <span class="font-bold text-slate-700 w-28 flex items-center gap-1.5">
+                                    <span>💖</span> รอบอก
+                                </span>
+                                <div class="flex items-center gap-2 flex-1">
+                                    <input type="number" id="m-chest-current" placeholder="ปัจจุบัน" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-200 rounded-xl bg-white text-center font-bold text-slate-800 focus:ring-2 focus:ring-pink-300">
+                                    <span class="text-pink-400 font-bold">➔</span>
+                                    <input type="number" id="m-chest-target" placeholder="เป้าหมาย" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-300 rounded-xl bg-white text-center font-extrabold text-pink-600 focus:ring-2 focus:ring-pink-300">
                                 </div>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <span class="text-sm font-black text-pastel-brand">${item.calories} <span class="text-xs font-normal text-slate-400">kcal</span></span>
-                                <button onclick="deleteLogItem(${idx})" class="text-slate-300 hover:text-rose-400 transition">
-                                    <i class="fa-solid fa-trash-can text-sm"></i>
-                                </button>
+
+                            <!-- Arm -->
+                            <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+                                <span class="font-bold text-slate-700 w-28 flex items-center gap-1.5">
+                                    <span>💪</span> รอบต้นแขน
+                                </span>
+                                <div class="flex items-center gap-2 flex-1">
+                                    <input type="number" id="m-arm-current" placeholder="ปัจจุบัน" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-200 rounded-xl bg-white text-center font-bold text-slate-800 focus:ring-2 focus:ring-pink-300">
+                                    <span class="text-pink-400 font-bold">➔</span>
+                                    <input type="number" id="m-arm-target" placeholder="เป้าหมาย" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-300 rounded-xl bg-white text-center font-extrabold text-pink-600 focus:ring-2 focus:ring-pink-300">
+                                </div>
+                            </div>
+
+                            <!-- Waist -->
+                            <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+                                <span class="font-bold text-slate-700 w-28 flex items-center gap-1.5">
+                                    <span>🎀</span> รอบเอว
+                                </span>
+                                <div class="flex items-center gap-2 flex-1">
+                                    <input type="number" id="m-waist-current" placeholder="ปัจจุบัน" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-200 rounded-xl bg-white text-center font-bold text-slate-800 focus:ring-2 focus:ring-pink-300">
+                                    <span class="text-pink-400 font-bold">➔</span>
+                                    <input type="number" id="m-waist-target" placeholder="เป้าหมาย" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-300 rounded-xl bg-white text-center font-extrabold text-pink-600 focus:ring-2 focus:ring-pink-300">
+                                </div>
+                            </div>
+
+                            <!-- Hips -->
+                            <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+                                <span class="font-bold text-slate-700 w-28 flex items-center gap-1.5">
+                                    <span>🍑</span> รอบสะโพก
+                                </span>
+                                <div class="flex items-center gap-2 flex-1">
+                                    <input type="number" id="m-hips-current" placeholder="ปัจจุบัน" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-200 rounded-xl bg-white text-center font-bold text-slate-800 focus:ring-2 focus:ring-pink-300">
+                                    <span class="text-pink-400 font-bold">➔</span>
+                                    <input type="number" id="m-hips-target" placeholder="เป้าหมาย" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-300 rounded-xl bg-white text-center font-extrabold text-pink-600 focus:ring-2 focus:ring-pink-300">
+                                </div>
+                            </div>
+
+                            <!-- Thigh -->
+                            <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+                                <span class="font-bold text-slate-700 w-28 flex items-center gap-1.5">
+                                    <span>🦵</span> รอบต้นขา
+                                </span>
+                                <div class="flex items-center gap-2 flex-1">
+                                    <input type="number" id="m-thigh-current" placeholder="ปัจจุบัน" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-200 rounded-xl bg-white text-center font-bold text-slate-800 focus:ring-2 focus:ring-pink-300">
+                                    <span class="text-pink-400 font-bold">➔</span>
+                                    <input type="number" id="m-thigh-target" placeholder="เป้าหมาย" oninput="updateMetricsDisplay()" class="w-full px-3 py-2 border border-pink-300 rounded-xl bg-white text-center font-extrabold text-pink-600 focus:ring-2 focus:ring-pink-300">
+                                </div>
                             </div>
                         </div>
-                    `;
-                }).join('');
-            }
-        }
 
-        function renderPresetFoods(filterText = '') {
-            const grid = document.getElementById('preset-foods-grid');
-            if (!grid) return;
-
-            const filtered = PRESET_THAI_FOODS.filter(item => 
-                item.name.toLowerCase().includes(filterText.toLowerCase())
-            );
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-400 text-xs">ไม่พบเมนูที่ตรงกับคำค้นหา</div>`;
-                return;
-            }
-
-            grid.innerHTML = filtered.map(item => `
-                <div onclick='openMealModal(${JSON.stringify(item)})' class="cute-btn p-3.5 bg-white hover:bg-pastel-lightpink border-2 border-pastel-peach/60 rounded-2xl cursor-pointer transition flex items-center justify-between group shadow-sm">
-                    <div>
-                        <h4 class="text-xs font-bold text-pastel-text group-hover:text-pastel-brand">${item.name}</h4>
-                        <p class="text-[10px] text-slate-400 font-medium mt-0.5">P:${item.protein}g | C:${item.carbs}g | F:${item.fat}g</p>
+                        <button onclick="saveBodyMetrics()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-2xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm active:scale-95">
+                            <span>💾</span>
+                            <span>บันทึกข้อมูลสัดส่วนล่าสุด</span>
+                        </button>
                     </div>
-                    <span class="text-xs font-black text-pastel-brand bg-pastel-peach px-2.5 py-1 rounded-xl border border-pastel-rose/50 shrink-0">${item.calories} kcal</span>
+
+                    <!-- Summary Badges & Health Indicators (Pastel Pink) -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold text-pink-600 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>🎯</span> สรุปส่วนต่างเป้าหมายที่ต้องลด
+                        </h3>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3.5 rounded-2xl bg-pink-50/60 border border-pink-100">
+                                <span class="text-xs text-slate-500 font-medium flex items-center gap-1"><span>💖</span> รอบอก</span>
+                                <span id="diff-chest" class="text-sm sm:text-base font-bold text-slate-800 mt-1 block">-</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-pink-50/60 border border-pink-100">
+                                <span class="text-xs text-slate-500 font-medium flex items-center gap-1"><span>💪</span> ต้นแขน</span>
+                                <span id="diff-arm" class="text-sm sm:text-base font-bold text-slate-800 mt-1 block">-</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-pink-50/60 border border-pink-100">
+                                <span class="text-xs text-slate-500 font-medium flex items-center gap-1"><span>🎀</span> รอบเอว</span>
+                                <span id="diff-waist" class="text-sm sm:text-base font-bold text-slate-800 mt-1 block">-</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-pink-50/60 border border-pink-100">
+                                <span class="text-xs text-slate-500 font-medium flex items-center gap-1"><span>🍑</span> สะโพก</span>
+                                <span id="diff-hips" class="text-sm sm:text-base font-bold text-slate-800 mt-1 block">-</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-pink-50/60 border border-pink-100 col-span-2">
+                                <span class="text-xs text-slate-500 font-medium flex items-center gap-1"><span>🦵</span> ต้นขา</span>
+                                <span id="diff-thigh" class="text-sm sm:text-base font-bold text-slate-800 mt-1 block">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Waist-to-Hip Ratio (Pastel Peach/Cream Box) -->
+                        <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs sm:text-sm space-y-1">
+                            <div class="flex justify-between font-bold text-amber-900">
+                                <span class="flex items-center gap-1.5"><span>📊</span> ดัชนีรอบเอวต่อสะโพก (WHR)</span>
+                                <span id="whr-value" class="text-base font-black">-</span>
+                            </div>
+                            <p id="whr-status" class="text-xs text-amber-800 font-medium">กรอกข้อมูลรอบเอวและรอบสะโพกเพื่อประเมินเกณฑ์ไขมันช่องท้องนะจ๊ะ</p>
+                        </div>
+                    </div>
                 </div>
-            `).join('');
-        }
 
-        function filterPresetFoods(val) {
-            renderPresetFoods(val);
-        }
+                <!-- Structured Reduction Tips Cards (Exercise & Nutrition Guide in Pastel) -->
+                <div class="pt-4 border-t border-pink-100 space-y-4">
+                    <h3 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+                        <span>🥑</span> แนวทางและวิธีกระชับสัดส่วนเฉพาะจุด (Targeted Reduction Guide)
+                    </h3>
 
-        function fillQuickText(text) {
-            const input = document.getElementById('ai-meal-text-input');
-            if (input) {
-                input.value = text;
-                handleCalculateMealText();
+                    <!-- Dynamic AI Plan Output Box (Pastel Lavender/Mint) -->
+                    <div id="ai-body-plan-container" class="hidden p-5 rounded-2xl bg-gradient-to-r from-pink-50 via-purple-50 to-emerald-50 border-2 border-pink-200 text-xs sm:text-sm text-slate-700 space-y-2.5">
+                        <h4 class="font-bold text-pink-700 flex items-center gap-2 text-sm sm:text-base">
+                            <span>🐰✨</span> แผนคำแนะนำพิเศษจาก Gemini AI สำหรับสัดส่วนของคุณ
+                        </h4>
+                        <div id="ai-body-plan-text" class="leading-relaxed whitespace-pre-line text-slate-700 font-medium"></div>
+                    </div>
+
+                    <!-- General Targeted Exercises Grid in Cute Pastel Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                        <!-- Waist card -->
+                        <div class="bg-amber-50/60 p-4 rounded-2xl border border-amber-100 space-y-2 shadow-sm">
+                            <div class="font-bold text-amber-900 flex items-center gap-2">
+                                <span class="text-lg">🎀</span>
+                                <span>วิธีกระชับรอบเอว & หน้าท้อง</span>
+                            </div>
+                            <ul class="space-y-1.5 text-slate-600 leading-relaxed font-medium">
+                                <li>✨ <strong>คุมโภชนาการ:</strong> ลดน้ำตาล และโซเดียม เพื่อลดอาการบวมน้ำ</li>
+                                <li>✨ <strong>เวทเทรนนิ่ง:</strong> Plank, Russian Twists, Crunches</li>
+                                <li>✨ <strong>คาร์ดิโอ:</strong> HIIT 20 นาที 3 วัน/สัปดาห์ เผาผลาญไขมัน</li>
+                            </ul>
+                        </div>
+
+                        <!-- Thighs card -->
+                        <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 space-y-2 shadow-sm">
+                            <div class="font-bold text-emerald-900 flex items-center gap-2">
+                                <span class="text-lg">🦵</span>
+                                <span>วิธีกระชับต้นขา & สะโพก</span>
+                            </div>
+                            <ul class="space-y-1.5 text-slate-600 leading-relaxed font-medium">
+                                <li>✨ <strong>เวทเทรนนิ่ง:</strong> Squats, Lunges, Glute Bridges</li>
+                                <li>✨ <strong>คาร์ดิโอ:</strong> เดินชัน (Incline Walk) หรือปั่นจักรยาน</li>
+                                <li>✨ <strong>ทริค:</strong> กินโปรตีน 1.5g/น้ำหนักตัว เสริมกล้ามเนื้อให้เฟิร์ม</li>
+                            </ul>
+                        </div>
+
+                        <!-- Arm card -->
+                        <div class="bg-purple-50/60 p-4 rounded-2xl border border-purple-100 space-y-2 shadow-sm">
+                            <div class="font-bold text-purple-900 flex items-center gap-2">
+                                <span class="text-lg">💪</span>
+                                <span>วิธีกระชับต้นแขน & แผ่นหลัง</span>
+                            </div>
+                            <ul class="space-y-1.5 text-slate-600 leading-relaxed font-medium">
+                                <li>✨ <strong>ต้นแขน:</strong> Tricep Dips, วิดพื้น (Push-ups), Bicep Curls</li>
+                                <li>✨ <strong>อก & หลัง:</strong> Dumbbell Press ช่วยให้สรีระตั้งตรงสวย</li>
+                                <li>✨ <strong>เน้นย้ำ:</strong> ลดไขมันรวมทั้งตัวจะช่วยให้แขนกระชับเร็วขึ้น</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 3: BMR / TDEE CALCULATOR SETTINGS ==================== -->
+        <div id="tab-profile" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-7 border border-pink-100 shadow-cute-card space-y-5 max-w-xl mx-auto">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span class="text-2xl">🧸</span> ตั้งค่าโปรไฟล์ & คำนวณ BMR / TDEE
+                    </h2>
+                    <p class="text-xs text-pink-400 mt-1 font-medium">กรอกข้อมูลส่วนตัวเพื่อคำนวณแคลอรี่ที่เหมาะสมสำหรับคุณ</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 block mb-1.5">👤 เพศ</label>
+                            <select id="user-gender" onchange="calculateBmrTdee()" class="w-full px-3.5 py-2.5 border border-pink-200 rounded-2xl text-sm bg-pink-50/30 focus:ring-2 focus:ring-pink-300 font-medium">
+                                <option value="female">ผู้หญิง (Female) 👩</option>
+                                <option value="male">ผู้ชาย (Male) 👨</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 block mb-1.5">🎂 อายุ (ปี)</label>
+                            <input type="number" id="user-age" value="25" onchange="calculateBmrTdee()" class="w-full px-3.5 py-2.5 border border-pink-200 rounded-2xl text-sm bg-pink-50/30 focus:ring-2 focus:ring-pink-300 font-bold">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 block mb-1.5">⚖️ น้ำหนัก (กก.)</label>
+                            <input type="number" id="user-weight" value="55" onchange="calculateBmrTdee()" class="w-full px-3.5 py-2.5 border border-pink-200 rounded-2xl text-sm bg-pink-50/30 focus:ring-2 focus:ring-pink-300 font-bold">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 block mb-1.5">📏 ส่วนสูง (ซม.)</label>
+                            <input type="number" id="user-height" value="160" onchange="calculateBmrTdee()" class="w-full px-3.5 py-2.5 border border-pink-200 rounded-2xl text-sm bg-pink-50/30 focus:ring-2 focus:ring-pink-300 font-bold">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 block mb-1.5">🏃‍♀️ ระดับกิจกรรมประจำวัน</label>
+                        <select id="user-activity" onchange="calculateBmrTdee()" class="w-full px-3.5 py-2.5 border border-pink-200 rounded-2xl text-sm bg-pink-50/30 focus:ring-2 focus:ring-pink-300 font-medium">
+                            <option value="1.2">นั่งทำงานเป็นหลัก ไม่ออกกำลังกายเลย 🛋️</option>
+                            <option value="1.375" selected>ออกกำลังกายเบาๆ 1-3 วัน/สัปดาห์ 🚶‍♀️</option>
+                            <option value="1.55">ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์ 🏃‍♀️</option>
+                            <option value="1.725">ออกกำลังกายหนัก 6-7 วัน/สัปดาห์ 🏋️‍♀️</option>
+                            <option value="1.9">ออกกำลังกายหนักมาก / นักกีฬา ⚡</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 block mb-1.5">🎯 เป้าหมายของคุณ</label>
+                        <select id="user-goal" onchange="calculateBmrTdee()" class="w-full px-3.5 py-2.5 border border-pink-200 rounded-2xl text-sm bg-pink-50/30 focus:ring-2 focus:ring-pink-300 font-medium">
+                            <option value="-500">ลดน้ำหนักอย่างสุขภาพดี (-500 kcal/วัน) 🥗</option>
+                            <option value="0" selected>รักษาน้ำหนัก & สัดส่วน (Maintain) ⚖️</option>
+                            <option value="300">เพิ่มกล้ามเนื้อ & กระชับทรง (+300 kcal/วัน) 💪</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-3">
+                        <button onclick="saveUserProfile()" class="w-full bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white font-bold py-3 rounded-2xl text-sm transition shadow-cute-btn flex items-center justify-center gap-2 active:scale-95">
+                            <span>🌸</span>
+                            <span>บันทึกตั้งค่าโปรไฟล์</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Pastel Toast Message Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none"></div>
+
+    <script>
+        // State Management variables
+        let diaryEntries = [];
+        let bodyMetrics = {
+            chestCurrent: 85, chestTarget: 82,
+            armCurrent: 27, armTarget: 25,
+            waistCurrent: 70, waistTarget: 64,
+            hipsCurrent: 92, hipsTarget: 88,
+            thighCurrent: 52, thighTarget: 48
+        };
+        let userProfile = {
+            gender: 'female',
+            age: 25,
+            weight: 55,
+            height: 160,
+            activity: 1.375,
+            goal: 0,
+            bmr: 1350,
+            tdee: 1850,
+            targetCalories: 1850
+        };
+
+        // Initialize application on page load
+        window.onload = function() {
+            loadUserProfile();
+            loadDiaryEntries();
+            loadBodyMetrics();
+            updateDashboard();
+            updateDateDisplay();
+            updateMetricsDisplay();
+        };
+
+        function updateDateDisplay() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const el = document.getElementById('date-display');
+            if (el) {
+                el.innerText = '🌸 ' + today.toLocaleDateString('th-TH', options);
             }
         }
 
-        function handleCalculateMealText() {
-            const input = document.getElementById('ai-meal-text-input');
-            const text = input ? input.value.trim() : '';
+        // Navigation Tab Switching Logic
+        function switchTab(tabName) {
+            document.querySelectorAll('.cute-tab-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            if (activeBtn) activeBtn.classList.add('active');
 
-            if (!text) {
-                showToast('กรุณากรอกชื่อเมนูอาหารก่อนน้า ✨');
-                return;
+            ['diary', 'analytics', 'metrics', 'profile'].forEach(name => {
+                const tabEl = document.getElementById(`tab-${name}`);
+                if (tabEl) tabEl.classList.add('hidden');
+            });
+
+            const currentTab = document.getElementById(`tab-${tabName}`);
+            if (currentTab) currentTab.classList.remove('hidden');
+
+            if (tabName === 'analytics') {
+                updateAnalyticsView();
+            } else if (tabName === 'metrics') {
+                updateMetricsDisplay();
             }
+        }
 
-            const match = PRESET_THAI_FOODS.find(f => f.name.includes(text) || text.includes(f.name));
-            if (match) {
-                openMealModal({
-                    name: text,
-                    calories: match.calories,
-                    protein: match.protein,
-                    carbs: match.carbs,
-                    fat: match.fat
+        // Body Metrics Calculation & Data Management
+        function loadBodyMetrics() {
+            const saved = localStorage.getItem('nutri_body_metrics');
+            if (saved) {
+                try {
+                    bodyMetrics = JSON.parse(saved);
+                } catch(e) {}
+            }
+            if (document.getElementById('m-chest-current')) {
+                document.getElementById('m-chest-current').value = bodyMetrics.chestCurrent || '';
+                document.getElementById('m-chest-target').value = bodyMetrics.chestTarget || '';
+                document.getElementById('m-arm-current').value = bodyMetrics.armCurrent || '';
+                document.getElementById('m-arm-target').value = bodyMetrics.armTarget || '';
+                document.getElementById('m-waist-current').value = bodyMetrics.waistCurrent || '';
+                document.getElementById('m-waist-target').value = bodyMetrics.waistTarget || '';
+                document.getElementById('m-hips-current').value = bodyMetrics.hipsCurrent || '';
+                document.getElementById('m-hips-target').value = bodyMetrics.hipsTarget || '';
+                document.getElementById('m-thigh-current').value = bodyMetrics.thighCurrent || '';
+                document.getElementById('m-thigh-target').value = bodyMetrics.thighTarget || '';
+            }
+        }
+
+        function saveBodyMetrics() {
+            readBodyMetricsFromInputs();
+            localStorage.setItem('nutri_body_metrics', JSON.stringify(bodyMetrics));
+            updateMetricsDisplay();
+            showToast("บันทึกเป้าหมายและสัดส่วนน่ารักๆ เรียบร้อยแล้ว! 🎀");
+        }
+
+        function readBodyMetricsFromInputs() {
+            bodyMetrics = {
+                chestCurrent: parseFloat(document.getElementById('m-chest-current')?.value) || 0,
+                chestTarget: parseFloat(document.getElementById('m-chest-target')?.value) || 0,
+                armCurrent: parseFloat(document.getElementById('m-arm-current')?.value) || 0,
+                armTarget: parseFloat(document.getElementById('m-arm-target')?.value) || 0,
+                waistCurrent: parseFloat(document.getElementById('m-waist-current')?.value) || 0,
+                waistTarget: parseFloat(document.getElementById('m-waist-target')?.value) || 0,
+                hipsCurrent: parseFloat(document.getElementById('m-hips-current')?.value) || 0,
+                hipsTarget: parseFloat(document.getElementById('m-hips-target')?.value) || 0,
+                thighCurrent: parseFloat(document.getElementById('m-thigh-current')?.value) || 0,
+                thighTarget: parseFloat(document.getElementById('m-thigh-target')?.value) || 0,
+            };
+        }
+
+        function formatDiff(current, target) {
+            if (!current || !target) return '-';
+            const diff = (current - target).toFixed(1);
+            if (diff > 0) return `<span class="text-rose-500 font-bold">ลดอีก ${diff} ซม. 🍓</span>`;
+            if (diff == 0) return `<span class="text-emerald-500 font-bold">ถึงเป้าหมายแล้ว! 🎉</span>`;
+            return `<span class="text-purple-500 font-bold">+${Math.abs(diff)} ซม. (เพิ่มขึ้น) 🌸</span>`;
+        }
+
+        function updateMetricsDisplay() {
+            readBodyMetricsFromInputs();
+
+            const diffChest = document.getElementById('diff-chest');
+            const diffArm = document.getElementById('diff-arm');
+            const diffWaist = document.getElementById('diff-waist');
+            const diffHips = document.getElementById('diff-hips');
+            const diffThigh = document.getElementById('diff-thigh');
+
+            if (diffChest) diffChest.innerHTML = formatDiff(bodyMetrics.chestCurrent, bodyMetrics.chestTarget);
+            if (diffArm) diffArm.innerHTML = formatDiff(bodyMetrics.armCurrent, bodyMetrics.armTarget);
+            if (diffWaist) diffWaist.innerHTML = formatDiff(bodyMetrics.waistCurrent, bodyMetrics.waistTarget);
+            if (diffHips) diffHips.innerHTML = formatDiff(bodyMetrics.hipsCurrent, bodyMetrics.hipsTarget);
+            if (diffThigh) diffThigh.innerHTML = formatDiff(bodyMetrics.thighCurrent, bodyMetrics.thighTarget);
+
+            // Calculate Waist-to-Hip Ratio (WHR)
+            const waist = bodyMetrics.waistCurrent;
+            const hips = bodyMetrics.hipsCurrent;
+            const whrEl = document.getElementById('whr-value');
+            const statusEl = document.getElementById('whr-status');
+
+            if (whrEl && statusEl) {
+                if (waist > 0 && hips > 0) {
+                    const whr = (waist / hips).toFixed(2);
+                    whrEl.innerText = whr;
+                    const isMale = userProfile.gender === 'male';
+
+                    if ((isMale && whr > 0.90) || (!isMale && whr > 0.85)) {
+                        statusEl.innerText = "⚠️ WHR สูงกว่าเกณฑ์นิดหน่อยน้า ควรเน้นลดรอบเอวและคุมน้ำตาลจ้า";
+                        statusEl.className = "text-xs text-rose-700 font-semibold";
+                    } else {
+                        statusEl.innerText = "✅ ยอดเยี่ยมมาก! WHR อยู่ในเกณฑ์สุขภาพดี หุ่นเฟิร์มสมส่วนสุดๆ 💖";
+                        statusEl.className = "text-xs text-emerald-700 font-semibold";
+                    }
+                } else {
+                    whrEl.innerText = '-';
+                    statusEl.innerText = 'กรอกข้อมูลรอบเอวและรอบสะโพกเพื่อประเมินเกณฑ์ไขมันช่องท้องนะจ๊ะ';
+                }
+            }
+        }
+
+        async function getAiBodyReductionPlan() {
+            readBodyMetricsFromInputs();
+
+            const btn = document.getElementById('btn-ai-body-plan');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>น้อง AI กำลังวิเคราะห์...</span>`;
+
+            const prompt = `ทำหน้าที่เป็นเทรนเนอร์ส่วนตัวและนักกำหนดอาหารสไตล์น่ารัก เป็นกันเอง ให้คำแนะนำการลดสัดส่วนร่างกายตามข้อมูลสัดส่วนปัจจุบันและเป้าหมายดังนี้:
+- เพศ: ${userProfile.gender === 'male' ? 'ชาย' : 'หญิง'}
+- รอบอก: ปัจจุบัน ${bodyMetrics.chestCurrent} ซม. -> เป้าหมาย ${bodyMetrics.chestTarget} ซม.
+- ต้นแขน: ปัจจุบัน ${bodyMetrics.armCurrent} ซม. -> เป้าหมาย ${bodyMetrics.armTarget} ซม.
+- รอบเอว: ปัจจุบัน ${bodyMetrics.waistCurrent} ซม. -> เป้าหมาย ${bodyMetrics.waistTarget} ซม.
+- สะโพก: ปัจจุบัน ${bodyMetrics.hipsCurrent} ซม. -> เป้าหมาย ${bodyMetrics.hipsTarget} ซม.
+- ต้นขา: ปัจจุบัน ${bodyMetrics.thighCurrent} ซม. -> เป้าหมาย ${bodyMetrics.thighTarget} ซม.
+
+กรุณาสรุปจุดที่ต้องเน้นลดเป็นพิเศษ แนะนำตารางการออกกำลังกายแบบตรงจุด 3 ข้อหลัก และทริคการกินอาหารที่ช่วยกระชับสัดส่วนนี้ ตอบเป็นภาษาไทยอย่างกระชับ น่ารัก อ่านง่าย มีอิโมจิสดใส`;
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
                 });
-            } else {
-                let estCal = 450;
-                let estP = 20;
-                let estC = 55;
-                let estF = 15;
 
-                if (text.includes('หวานน้อย') || text.includes('ไม่หวาน')) {
-                    estCal -= 100;
-                    estC -= 20;
-                }
-                if (text.includes('หมูกรอบ') || text.includes('ทอด') || text.includes('ไข่เจียว')) {
-                    estCal += 200;
-                    estF += 18;
-                }
-                if (text.includes('อกไก่') || text.includes('ต้ม')) {
-                    estCal -= 80;
-                    estP += 10;
-                    estF -= 6;
-                }
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
-                openMealModal({
-                    name: text,
-                    calories: Math.max(estCal, 80),
-                    protein: Math.max(estP, 2),
-                    carbs: Math.max(estC, 2),
-                    fat: Math.max(estF, 1)
-                });
+                if (text) {
+                    document.getElementById('ai-body-plan-container').classList.remove('hidden');
+                    document.getElementById('ai-body-plan-text').innerText = text;
+                    showToast("สร้างแผนลดสัดส่วนเฉพาะจุดด้วย AI สำเร็จแล้ว! ✨");
+                }
+            } catch (err) {
+                console.error("Failed to generate body plan:", err);
+                showToast("ไม่สามารถสร้างคำแนะนำได้ กรุณาลองใหม่อีกครั้ง", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
             }
         }
 
-        function handlePhotoUpload(event) {
+        // Custom Pastel Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const isSuccess = type === 'success';
+            const bgClass = isSuccess ? 'bg-white/95 text-slate-800 border-2 border-pink-200 shadow-cute-btn' : 'bg-rose-500 text-white shadow-lg';
+            const icon = isSuccess ? '🌸' : '⚠️';
+
+            toast.className = `${bgClass} text-xs sm:text-sm font-bold px-4 py-3 rounded-2xl transition-all duration-300 flex items-center gap-2 transform translate-y-2 pointer-events-auto backdrop-blur-md`;
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // Image Handling & Gemini AI Vision Analysis
+        function handleFoodImageSelected(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById('photo-preview-img');
-                const container = document.getElementById('photo-preview-container');
-                img.src = e.target.result;
-                img.classList.remove('hidden');
-                container.classList.add('hidden');
+            const container = document.getElementById('image-analysis-container');
+            const previewImg = document.getElementById('food-image-preview');
+            const spinner = document.getElementById('image-analyzing-spinner');
+            const details = document.getElementById('image-analysis-details');
 
-                showToast('กำลังให้ AI วิเคราะห์เมนูจานนี้ให้อยู่นะคะ 🍓✨');
-                
-                setTimeout(() => {
-                    openMealModal({
-                        name: "เมนูภาพถ่าย (AI วิเคราะห์)",
-                        calories: 530,
-                        protein: 24,
-                        carbs: 58,
-                        fat: 20
-                    });
-                }, 1200);
+            container.classList.remove('hidden');
+            spinner.classList.remove('hidden');
+            details.classList.add('hidden');
+            previewImg.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const dataUrl = e.target.result;
+                previewImg.src = dataUrl;
+                previewImg.classList.remove('hidden');
+
+                const base64Data = dataUrl.split(',')[1];
+                const mimeType = file.type || 'image/jpeg';
+
+                try {
+                    await analyzeFoodImageWithGemini(base64Data, mimeType);
+                } catch (err) {
+                    console.error("Image analysis failed:", err);
+                    spinner.classList.add('hidden');
+                    showToast("ไม่สามารถวิเคราะห์รูปภาพได้ กรุณาลองใหม่อีกครั้ง", "error");
+                }
             };
             reader.readAsDataURL(file);
+            event.target.value = ''; // Reset file input
         }
 
-        function initWeightChart() {
-            const ctx = document.getElementById('weightChart');
-            if (!ctx) return;
+        async function analyzeFoodImageWithGemini(base64Data, mimeType) {
+            const prompt = `วิเคราะห์รูปภาพอาหารนี้อย่างละเอียด และคำนวณคุณค่าทางโภชนาการสำหรับปริมาณในภาพ:
+1. ชื่อเมนูอาหาร (ภาษาไทย)
+2. ปริมาณแคลอรี่รวม (kcal) (ตัวเลขเต็ม)
+3. โปรตีน (กรัม) (ตัวเลข)
+4. คาร์โบไฮเดรต (กรัม) (ตัวเลข)
+5. ไขมัน (กรัม) (ตัวเลข)
+6. ประเภทมื้ออาหารที่เหมาะสม ("breakfast", "lunch", "dinner", หรือ "snack")
+7. ข้อแนะนำสั้นๆ สไตล์น่ารักและเข้าใจง่าย
 
-            const history = appState.weightHistory || [];
-            const labels = history.map(h => h.date);
-            const data = history.map(h => h.weight);
+ตอบกลับเป็น JSON รูปแบบนี้เท่านั้น:
+{
+  "name": "ชื่ออาหาร",
+  "calories": 450,
+  "protein": 22,
+  "carbs": 55,
+  "fat": 15,
+  "mealType": "lunch",
+  "notes": "คำแนะนำโภชนาการ"
+}`;
 
-            if (weightChartInstance) {
-                weightChartInstance.destroy();
-            }
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-            weightChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'น้ำหนัก (kg)',
-                        data: data,
-                        borderColor: '#FF70A6',
-                        backgroundColor: 'rgba(255, 112, 166, 0.15)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 6,
-                        pointBackgroundColor: '#FF70A6',
-                        pointHoverRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: { borderDash: [4, 4], color: '#FFE5EC' }
-                        },
-                        x: {
-                            grid: { display: false }
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: base64Data
+                            }
                         }
-                    }
+                    ]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json"
                 }
-            });
-        }
+            };
 
-        function renderBodyMeasurements() {
-            const list = appState.bodyMeasurementsHistory || [];
-            const tbody = document.getElementById('measurements-history-table-body');
-            const cardsEl = document.getElementById('latest-measurements-cards');
+            let response;
+            let retries = 3;
+            let delay = 1000;
 
-            if (!tbody || !cardsEl) return;
-
-            const latest = list.length > 0 ? list[list.length - 1] : null;
-            const first = list.length > 0 ? list[0] : null;
-
-            const metrics = [
-                { key: 'waist', label: 'รอบเอว 🎀' },
-                { key: 'chest', label: 'รอบอก 💕' },
-                { key: 'hips', label: 'สะโพก 🍑' },
-                { key: 'arm', label: 'ต้นแขน 💪' },
-                { key: 'thigh', label: 'ต้นขา 🦵' }
-            ];
-
-            cardsEl.innerHTML = metrics.map(m => {
-                const val = latest && latest[m.key] ? latest[m.key] : '--';
-                let diffStr = '';
-                if (latest && first && latest[m.key] && first[m.key] && list.length > 1) {
-                    const diff = (latest[m.key] - first[m.key]).toFixed(1);
-                    if (diff < 0) diffStr = `<span class="text-emerald-500 font-bold text-[11px]"><i class="fa-solid fa-arrow-down"></i> ${Math.abs(diff)} cm</span>`;
-                    else if (diff > 0) diffStr = `<span class="text-rose-400 font-bold text-[11px]"><i class="fa-solid fa-arrow-up"></i> +${diff} cm</span>`;
-                    else diffStr = `<span class="text-slate-400 font-medium text-[11px]">คงที่</span>`;
+            for (let i = 0; i < retries; i++) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) break;
+                } catch (e) {
+                    if (i === retries - 1) throw e;
                 }
-                return `
-                    <div class="p-3.5 rounded-2xl bg-white border-2 border-pastel-peach text-center shadow-sm">
-                        <span class="text-[10px] text-pastel-brand font-bold uppercase">${m.label}</span>
-                        <p class="text-xl font-black text-pastel-text mt-0.5">${val} <span class="text-xs font-normal text-slate-400">ซม.</span></p>
-                        <div class="mt-1">${diffStr}</div>
-                    </div>
-                `;
-            }).join('');
+                await new Promise(r => setTimeout(r, delay));
+                delay *= 2;
+            }
 
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400 font-medium">ยังไม่มีข้อมูลสัดส่วนที่บันทึกไว้</td></tr>`;
+            const result = await response.json();
+            const textResult = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (textResult) {
+                const parsed = JSON.parse(textResult);
+
+                document.getElementById('img-ai-name').value = parsed.name || 'อาหารจานโปรด';
+                document.getElementById('img-ai-cal').value = parsed.calories || 0;
+                document.getElementById('img-ai-protein').value = parsed.protein || 0;
+                document.getElementById('img-ai-carbs').value = parsed.carbs || 0;
+                document.getElementById('img-ai-fat').value = parsed.fat || 0;
+                document.getElementById('img-ai-meal-type').value = parsed.mealType || 'lunch';
+                document.getElementById('img-ai-notes-text').innerText = parsed.notes || 'วิเคราะห์ข้อมูลโภชนาการสำเร็จเรียบร้อย';
+
+                document.getElementById('image-analyzing-spinner').classList.add('hidden');
+                document.getElementById('image-analysis-details').classList.remove('hidden');
             } else {
-                tbody.innerHTML = list.slice().reverse().map((item, idx) => {
-                    const originalIndex = list.length - 1 - idx;
-                    return `
-                        <tr class="hover:bg-pastel-lightpink/40 transition">
-                            <td class="p-3 font-bold text-pastel-brand">${item.date}</td>
-                            <td class="p-3 text-center font-semibold">${item.waist || '-'}</td>
-                            <td class="p-3 text-center font-semibold">${item.chest || '-'}</td>
-                            <td class="p-3 text-center font-semibold">${item.hips || '-'}</td>
-                            <td class="p-3 text-center font-semibold">${item.arm || '-'}</td>
-                            <td class="p-3 text-center font-semibold">${item.thigh || '-'}</td>
-                            <td class="p-3 text-center">
-                                <button onclick="deleteMeasurementItem(${originalIndex})" class="text-slate-300 hover:text-rose-400 transition">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
+                throw new Error("No response data from Gemini API");
             }
         }
 
-        function handleLogMeasurements(e) {
-            e.preventDefault();
-            const waist = parseFloat(document.getElementById('input-m-waist').value);
-            const chest = parseFloat(document.getElementById('input-m-chest').value);
-            const hips = parseFloat(document.getElementById('input-m-hips').value);
-            const arm = parseFloat(document.getElementById('input-m-arm').value);
-            const thigh = parseFloat(document.getElementById('input-m-thigh').value);
+        function closeImageAnalysis() {
+            document.getElementById('image-analysis-container').classList.add('hidden');
+        }
 
-            if (!waist && !chest && !hips && !arm && !thigh) {
-                showToast('กรุณากรอกสัดส่วนอย่างน้อย 1 ช่องน้า ✨');
+        function saveImageAnalysisToLog() {
+            const name = document.getElementById('img-ai-name').value.trim() || 'อาหารจากรูปภาพ';
+            const calories = parseFloat(document.getElementById('img-ai-cal').value) || 0;
+            const protein = parseFloat(document.getElementById('img-ai-protein').value) || 0;
+            const carbs = parseFloat(document.getElementById('img-ai-carbs').value) || 0;
+            const fat = parseFloat(document.getElementById('img-ai-fat').value) || 0;
+            const mealType = document.getElementById('img-ai-meal-type').value;
+
+            addFoodItem({
+                id: Date.now(),
+                name: name,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                mealType: mealType
+            });
+
+            closeImageAnalysis();
+            showToast(`บันทึก ${name} ลงในมื้ออาหารเรียบร้อยแล้ว! 💖`);
+        }
+
+        function handleTextAiKeyPress(e) {
+            if (e.key === 'Enter') {
+                analyzeFoodTextWithGemini();
+            }
+        }
+
+        async function analyzeFoodTextWithGemini() {
+            const inputEl = document.getElementById('text-ai-input');
+            const userText = inputEl.value.trim();
+            if (!userText) {
+                showToast("กรุณาพิมพ์ชื่อหรือรายการอาหารก่อนส่งน้า 🌸", "error");
                 return;
             }
 
-            const today = appState.currentDateStr;
-            if (!appState.bodyMeasurementsHistory) appState.bodyMeasurementsHistory = [];
-            
-            appState.bodyMeasurementsHistory.push({
-                date: today,
-                waist: waist || null,
-                chest: chest || null,
-                hips: hips || null,
-                arm: arm || null,
-                thigh: thigh || null
-            });
+            const btn = document.getElementById('btn-text-ai');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังวิเคราะห์...</span>`;
 
-            saveStateToStorage();
-            renderBodyMeasurements();
+            const prompt = `ประเมินรายการอาหารจากข้อความต่อไปนี้: "${userText}"
+คำนวณโภชนาการรวมของข้อความนี้:
+1. ชื่อสรุปรายการอาหาร (ภาษาไทย)
+2. แคลอรี่รวม (kcal)
+3. โปรตีน (กรัม)
+4. คาร์โบไฮเดรต (กรัม)
+5. ไขมัน (กรัม)
+6. มื้ออาหารที่เหมาะสม ("breakfast", "lunch", "dinner", หรือ "snack")
 
-            document.getElementById('input-m-waist').value = '';
-            document.getElementById('input-m-chest').value = '';
-            document.getElementById('input-m-hips').value = '';
-            document.getElementById('input-m-arm').value = '';
-            document.getElementById('input-m-thigh').value = '';
+ตอบกลับเป็น JSON รูปแบบนี้เท่านั้น:
+{
+  "name": "ชื่อรายการอาหาร",
+  "calories": 350,
+  "protein": 15,
+  "carbs": 40,
+  "fat": 10,
+  "mealType": "lunch"
+}`;
 
-            showToast('บันทึกสัดส่วนร่างกายเรียบร้อยแล้วค่ะ ✨🌸');
-        }
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-        function deleteMeasurementItem(index) {
-            if (appState.bodyMeasurementsHistory) {
-                appState.bodyMeasurementsHistory.splice(index, 1);
-                saveStateToStorage();
-                renderBodyMeasurements();
-                showToast('ลบบันทึกสัดส่วนเรียบร้อยแล้ว');
-            }
-        }
-
-        function handleLogWeight(e) {
-            e.preventDefault();
-            const val = parseFloat(document.getElementById('input-log-weight').value);
-            if (!val) return;
-
-            const today = appState.currentDateStr;
-            appState.userProfile.weight = val;
-            appState.weightHistory.push({ date: today, weight: val });
-
-            saveStateToStorage();
-            updateCalculations();
-            
-            if (weightChartInstance) {
-                weightChartInstance.data.labels.push(today);
-                weightChartInstance.data.datasets[0].data.push(val);
-                weightChartInstance.update();
-            }
-
-            document.getElementById('input-log-weight').value = '';
-            showToast(`อัปเดตน้ำหนักเป็น ${val} kg แล้วค่ะ 🌸`);
-        }
-
-        function handleSaveProfile(e) {
-            e.preventDefault();
-            appState.userProfile = {
-                gender: document.getElementById('profile-gender').value,
-                age: parseFloat(document.getElementById('profile-age').value) || 28,
-                height: parseFloat(document.getElementById('profile-height').value) || 160,
-                weight: parseFloat(document.getElementById('profile-weight').value) || 60,
-                targetWeight: parseFloat(document.getElementById('profile-target-weight').value) || 52,
-                activity: parseFloat(document.getElementById('profile-activity').value) || 1.375,
-                pace: parseFloat(document.getElementById('profile-pace').value) || 0.5
-            };
-            saveStateToStorage();
-            updateCalculations();
-            renderDashboard();
-            showToast('บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว ✨');
-        }
-
-        function openMealModal(item) {
-            document.getElementById('modal-meal-name').value = item.name || '';
-            document.getElementById('modal-meal-cal').value = item.calories || 0;
-            document.getElementById('modal-meal-protein').value = item.protein || 0;
-            document.getElementById('modal-meal-carbs').value = item.carbs || 0;
-            document.getElementById('modal-meal-fat').value = item.fat || 0;
-            document.getElementById('meal-modal').classList.remove('hidden');
-        }
-
-        function closeMealModal() {
-            document.getElementById('meal-modal').classList.add('hidden');
-        }
-
-        function saveModalMeal() {
-            const name = document.getElementById('modal-meal-name').value;
-            const calories = parseFloat(document.getElementById('modal-meal-cal').value) || 0;
-            const protein = parseFloat(document.getElementById('modal-meal-protein').value) || 0;
-            const carbs = parseFloat(document.getElementById('modal-meal-carbs').value) || 0;
-            const fat = parseFloat(document.getElementById('modal-meal-fat').value) || 0;
-            const mealType = document.getElementById('modal-meal-type').value;
-
-            const today = appState.currentDateStr;
-            if (!appState.logs[today]) appState.logs[today] = [];
-
-            appState.logs[today].push({ name, calories, protein, carbs, fat, mealType });
-            saveStateToStorage();
-            renderDashboard();
-            closeMealModal();
-            showToast(`บันทึก ${name} เรียบร้อยแล้วค่ะ 🍓`);
-            switchTab('dashboard');
-        }
-
-        function deleteLogItem(index) {
-            const today = appState.currentDateStr;
-            if (appState.logs[today]) {
-                appState.logs[today].splice(index, 1);
-                saveStateToStorage();
-                renderDashboard();
-                showToast('ลบรายการอาหารเรียบร้อยแล้วค่ะ');
-            }
-        }
-
-        function addWater(amount) {
-            const today = appState.currentDateStr;
-            appState.waterLogs[today] = (appState.waterLogs[today] || 0) + amount;
-            saveStateToStorage();
-            renderDashboard();
-            showToast(`ดื่มน้ำเพิ่ม ${amount} ml 💧`);
-        }
-
-        function resetWater() {
-            const today = appState.currentDateStr;
-            appState.waterLogs[today] = 0;
-            saveStateToStorage();
-            renderDashboard();
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-tab').forEach(el => {
-                el.classList.remove('bg-pastel-pink', 'text-white', 'shadow-sm');
-                el.classList.add('text-slate-500');
-            });
-
-            const targetView = document.getElementById(`view-${tabId}`);
-            if (targetView) targetView.classList.remove('hidden');
-
-            const activeNav = document.getElementById(`tab-${tabId}`);
-            if (activeNav) {
-                activeNav.classList.add('bg-pastel-pink', 'text-white', 'shadow-sm');
-                activeNav.classList.remove('text-slate-500');
-            }
-
-            if (tabId === 'goals') {
-                if (weightChartInstance) weightChartInstance.update();
-                renderBodyMeasurements();
-            }
-        }
-
-        function handleDateChange(val) {
-            if (!val) return;
-            appState.currentDateStr = val;
-            renderDashboard();
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            const messageEl = document.getElementById('toast-message');
-            if (toast && messageEl) {
-                messageEl.textContent = msg;
-                toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-20');
-                setTimeout(() => {
-                    toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-20');
-                }, 2500);
-            }
-        }
-
-        function saveStateToStorage() {
-            localStorage.setItem('nutrifit_app_state', JSON.stringify(appState));
-        }
-
-        function loadStateFromStorage() {
             try {
-                const saved = localStorage.getItem('nutrifit_app_state');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    appState = { ...appState, ...parsed };
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                const result = await response.json();
+                const textResult = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (textResult) {
+                    const parsed = JSON.parse(textResult);
+                    addFoodItem({
+                        id: Date.now(),
+                        name: parsed.name || userText,
+                        calories: parsed.calories || 0,
+                        protein: parsed.protein || 0,
+                        carbs: parsed.carbs || 0,
+                        fat: parsed.fat || 0,
+                        mealType: parsed.mealType || 'lunch'
+                    });
+                    inputEl.value = '';
+                    showToast(`คำนวณและบันทึก "${parsed.name}" แล้ว! 🍱`);
                 }
-            } catch (e) {
-                console.error('Failed to load state from localStorage:', e);
+            } catch (err) {
+                console.error("Text analysis failed:", err);
+                showToast("เกิดข้อผิดพลาดในการวิเคราะห์ข้อความ", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         }
 
-        window.onload = function() {
-            document.getElementById('current-date-picker').value = appState.currentDateStr;
-            loadStateFromStorage();
-            updateCalculations();
-            renderDashboard();
-            renderPresetFoods();
-            initWeightChart();
-            renderBodyMeasurements();
-        };
+        // Food Diary Item CRUD
+        function addFoodItem(item) {
+            diaryEntries.push(item);
+            saveDiaryEntries();
+            updateDashboard();
+        }
+
+        function deleteFoodItem(id) {
+            diaryEntries = diaryEntries.filter(item => item.id !== id);
+            saveDiaryEntries();
+            updateDashboard();
+            showToast("ลบรายการเรียบร้อยแล้วจ้า 🗑️");
+        }
+
+        function clearAllDiary() {
+            if (diaryEntries.length === 0) return;
+            diaryEntries = [];
+            saveDiaryEntries();
+            updateDashboard();
+            showToast("ล้างรายการประจำวันเรียบร้อยแล้ว ✨");
+        }
+
+        // LocalStorage Logic
+        function saveDiaryEntries() {
+            localStorage.setItem('nutri_diary_entries', JSON.stringify(diaryEntries));
+        }
+
+        function loadDiaryEntries() {
+            const saved = localStorage.getItem('nutri_diary_entries');
+            if (saved) {
+                try {
+                    diaryEntries = JSON.parse(saved);
+                } catch(e) {
+                    diaryEntries = [];
+                }
+            }
+        }
+
+        function updateDashboard() {
+            const meals = { breakfast: [], lunch: [], dinner: [], snack: [] };
+            let totalCal = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+
+            diaryEntries.forEach(item => {
+                const mealType = item.mealType || 'lunch';
+                if (meals[mealType]) meals[mealType].push(item);
+
+                totalCal += item.calories || 0;
+                totalProtein += item.protein || 0;
+                totalCarbs += item.carbs || 0;
+                totalFat += item.fat || 0;
+            });
+
+            // Update Meal Lists UI
+            ['breakfast', 'lunch', 'dinner', 'snack'].forEach(type => {
+                const listEl = document.getElementById(`meal-list-${type}`);
+                const subtotalEl = document.getElementById(`subtotal-${type}`);
+                
+                const mealItems = meals[type];
+                const subtotal = mealItems.reduce((sum, i) => sum + (i.calories || 0), 0);
+                if (subtotalEl) subtotalEl.innerText = `${subtotal} kcal`;
+
+                if (listEl) {
+                    if (mealItems.length === 0) {
+                        listEl.innerHTML = `<p class="text-xs text-pink-300 text-center py-2.5 font-medium">ยังไม่มีรายการอาหารในมื้อนี้ 🍰</p>`;
+                    } else {
+                        listEl.innerHTML = mealItems.map(item => `
+                            <div class="py-2.5 px-2 flex items-center justify-between text-xs sm:text-sm hover:bg-pink-50/40 rounded-xl transition">
+                                <div class="space-y-0.5">
+                                    <span class="font-bold text-slate-800 block">${item.name}</span>
+                                    <div class="flex items-center gap-2.5 text-[11px] font-semibold">
+                                        <span class="text-emerald-600">🥩 ${item.protein}g</span>
+                                        <span class="text-amber-600">🍞 ${item.carbs}g</span>
+                                        <span class="text-rose-500">🥑 ${item.fat}g</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="font-black text-pink-600">${item.calories} kcal</span>
+                                    <button onclick="deleteFoodItem(${item.id})" class="text-pink-300 hover:text-rose-500 transition p-1 text-sm" title="ลบรายการ">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            });
+
+            // Update Summary Totals
+            const targetCal = userProfile.targetCalories || 2000;
+            const remaining = targetCal - totalCal;
+
+            const consumedEl = document.getElementById('stat-consumed-cal');
+            const targetEl = document.getElementById('stat-target-cal');
+            const remainingEl = document.getElementById('stat-remaining-cal');
+            const calBadge = document.getElementById('stat-remaining-badge');
+
+            if (consumedEl) consumedEl.innerText = totalCal.toLocaleString();
+            if (targetEl) targetEl.innerText = targetCal.toLocaleString();
+            if (remainingEl) remainingEl.innerText = Math.abs(remaining).toLocaleString();
+
+            if (calBadge) {
+                if (remaining >= 0) {
+                    calBadge.className = "text-xs font-bold px-3 py-1.5 rounded-xl bg-pink-50 text-pink-600 border border-pink-200 shadow-sm flex items-center gap-1";
+                    calBadge.innerHTML = `<span>🎯</span> เหลือ <span id="stat-remaining-cal">${remaining.toLocaleString()}</span> kcal`;
+                } else {
+                    calBadge.className = "text-xs font-bold px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 shadow-sm flex items-center gap-1";
+                    calBadge.innerHTML = `<span>⚠️</span> เกินเป้า <span id="stat-remaining-cal">${Math.abs(remaining).toLocaleString()}</span> kcal`;
+                }
+            }
+
+            // Update Calorie Progress Bar
+            const calPercent = Math.min(100, Math.max(0, (totalCal / targetCal) * 100));
+            const progressCal = document.getElementById('progress-cal');
+            if (progressCal) {
+                progressCal.style.width = `${calPercent}%`;
+                progressCal.className = calPercent > 100 
+                    ? "bg-gradient-to-r from-rose-400 to-red-400 h-2.5 rounded-full transition-all duration-500 shadow-sm" 
+                    : "bg-gradient-to-r from-pink-400 to-rose-400 h-2.5 rounded-full transition-all duration-500 shadow-sm";
+            }
+
+            // Update Macros Stat Display
+            const statProtein = document.getElementById('stat-protein');
+            const statCarbs = document.getElementById('stat-carbs');
+            const statFat = document.getElementById('stat-fat');
+
+            if (statProtein) statProtein.innerText = Math.round(totalProtein);
+            if (statCarbs) statCarbs.innerText = Math.round(totalCarbs);
+            if (statFat) statFat.innerText = Math.round(totalFat);
+
+            const targetProtein = Math.round((targetCal * 0.25) / 4);
+            const targetCarbs = Math.round((targetCal * 0.50) / 4);
+            const targetFat = Math.round((targetCal * 0.25) / 9);
+
+            const progProtein = document.getElementById('progress-protein');
+            const progCarbs = document.getElementById('progress-carbs');
+            const progFat = document.getElementById('progress-fat');
+
+            if (progProtein) progProtein.style.width = `${Math.min(100, (totalProtein / targetProtein) * 100)}%`;
+            if (progCarbs) progCarbs.style.width = `${Math.min(100, (totalCarbs / targetCarbs) * 100)}%`;
+            if (progFat) progFat.style.width = `${Math.min(100, (totalFat / targetFat) * 100)}%`;
+        }
+
+        function calculateBmrTdee() {
+            const gender = document.getElementById('user-gender')?.value || 'female';
+            const age = parseFloat(document.getElementById('user-age')?.value) || 25;
+            const weight = parseFloat(document.getElementById('user-weight')?.value) || 55;
+            const height = parseFloat(document.getElementById('user-height')?.value) || 160;
+            const activity = parseFloat(document.getElementById('user-activity')?.value) || 1.375;
+            const goal = parseFloat(document.getElementById('user-goal')?.value) || 0;
+
+            // Mifflines-St Jeor Equation
+            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            bmr = gender === 'male' ? bmr + 5 : bmr - 161;
+
+            const tdee = bmr * activity;
+            const targetCal = Math.round(tdee + goal);
+
+            userProfile = {
+                gender, age, weight, height, activity, goal,
+                bmr: Math.round(bmr),
+                tdee: Math.round(tdee),
+                targetCalories: Math.max(1000, targetCal)
+            };
+        }
+
+        function saveUserProfile() {
+            calculateBmrTdee();
+            localStorage.setItem('nutri_user_profile', JSON.stringify(userProfile));
+            updateDashboard();
+            showToast("บันทึกเป้าหมายและข้อมูลโปรไฟล์เรียบร้อยแล้ว 🧸✨");
+        }
+
+        function loadUserProfile() {
+            const saved = localStorage.getItem('nutri_user_profile');
+            if (saved) {
+                try {
+                    userProfile = JSON.parse(saved);
+                    if (document.getElementById('user-gender')) document.getElementById('user-gender').value = userProfile.gender || 'female';
+                    if (document.getElementById('user-age')) document.getElementById('user-age').value = userProfile.age || 25;
+                    if (document.getElementById('user-weight')) document.getElementById('user-weight').value = userProfile.weight || 55;
+                    if (document.getElementById('user-height')) document.getElementById('user-height').value = userProfile.height || 160;
+                    if (document.getElementById('user-activity')) document.getElementById('user-activity').value = userProfile.activity || 1.375;
+                    if (document.getElementById('user-goal')) document.getElementById('user-goal').value = userProfile.goal || 0;
+                } catch(e) {}
+            }
+            calculateBmrTdee();
+        }
+
+        function updateAnalyticsView() {
+            const bmrEl = document.getElementById('analytics-bmr');
+            const tdeeEl = document.getElementById('analytics-tdee');
+            const targetEl = document.getElementById('analytics-target-cal');
+            const currentEl = document.getElementById('analytics-current-cal');
+            const adviceEl = document.getElementById('analytics-advice');
+
+            if (bmrEl) bmrEl.innerText = (userProfile.bmr || 0).toLocaleString();
+            if (tdeeEl) tdeeEl.innerText = (userProfile.tdee || 0).toLocaleString();
+            if (targetEl) targetEl.innerText = (userProfile.targetCalories || 0).toLocaleString();
+
+            const consumed = diaryEntries.reduce((sum, item) => sum + (item.calories || 0), 0);
+            if (currentEl) currentEl.innerText = consumed.toLocaleString();
+
+            if (adviceEl) {
+                const diff = consumed - userProfile.targetCalories;
+
+                if (consumed === 0) {
+                    adviceEl.innerText = "ยังไม่มีข้อมูลบันทึกมื้ออาหารวันนี้ ลองกดสแกนรูปอาหารมื้อแรกดูนะจ๊ะ ✨";
+                } else if (Math.abs(diff) <= 150) {
+                    adviceEl.innerText = "🌸 ยอดเยี่ยมมาก! พลังงานที่คุณบริโภควันนี้อยู่ในเกณฑ์ที่ใกล้เคียงกับเป้าหมายอย่างสมบูรณ์แบบ";
+                } else if (diff < -150) {
+                    adviceEl.innerText = `🍓 ระดับพลังงานยังต่ำกว่าเป้าหมายประมาณ ${Math.abs(diff)} kcal สามารถเพิ่มของว่างที่มีโปรตีนสูงหรือผลไม้เพื่อรับสารอาหารให้ครบถ้วนนะจ๊ะ`;
+                } else {
+                    adviceEl.innerText = `🥑 พลังงานเกินเป้าหมายประมาณ ${diff} kcal แนะนำให้เดินย่อยหรือทำกิจกรรมน่ารักๆ เพิ่มเติม เพื่อรักษาสมดุลแคลอรี่จ้า`;
+                }
+            }
+        }
     </script>
 </body>
 </html>
