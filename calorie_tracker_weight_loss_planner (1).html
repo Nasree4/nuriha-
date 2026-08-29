@@ -394,7 +394,7 @@
         }
 
         async function getAiBodyReductionPlan() {
-            if(!GEMINI_API_KEY || GEMINI_API_KEY === "ใส่_API_KEY_ตรงนี้") return showToast("กรุณาใส่ API Key ก่อนใช้งานจ้า", "error");
+            if(!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx") return showToast("AIzaSyB-xxxxxxxxxxxxxxxxxxxxxxxxx", "error");
             readBodyMetricsFromInputs(); const btn = document.getElementById('btn-ai-body-plan'); btn.innerHTML = "กำลังวิเคราะห์..."; btn.disabled=true;
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
             try {
